@@ -1,0 +1,17 @@
+# Netlify redirects file
+/*    /index.html   200
+
+# Handle client-side routing
+/dashboard    /index.html   200
+/transactions    /index.html   200
+/expenses    /index.html   200
+/banks    /index.html   200
+/tithing    /index.html   200
+/goals    /index.html   200
+/reports    /index.html   200
+/login    /index.html   200
+/signup    /index.html   200
+/reset-password    /index.html   200
+
+# Handle hash fragments for password reset
+/reset-password/*    /index.html   200

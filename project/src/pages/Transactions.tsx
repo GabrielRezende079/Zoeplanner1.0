@@ -1,0 +1,597 @@
+import React, { useState } from 'react';
+import { useFinance, Transaction, TransactionType, PaymentType } from '../stores/financeStore';
+import { useBanks } from '../stores/banksStore';
+import { PlusCircle, Trash2, Filter, BookOpen } from 'lucide-react';
+import CategorySelector from '../components/CategorySelector';
+import CustomSelect from '../components/CustomSelect';
+import ConfirmationModal from '../components/ConfirmationModal';
+
+const Transactions: React.FC = () => {
+  const { transactions, addTransaction, removeTransaction } = useFinance();
+  const { banks, loadBanksData, isDataLoaded: isBanksDataLoaded } = useBanks();
+  
+  // Predefined categories
+  const incomeCategories = [
+    'Salário',
+    'Venda',
+    'Investimentos',
+    'Bonificação',
+    'Presente Recebido',
+    'Outros'
+  ];
+  
+  const expenseCategories = [
+    'Alimentação',
+    'Moradia',
+    'Transporte',
+    'Saúde',
+    'Educação',
+    'Lazer',
+    'Vestuário',
+    'Impostos',
+    'Seguros',
+    'Combustível',
+    'Supermercado',
+    'Presentes',
+    'Doações',
+    'Outros'
+  ];
+  
+  // Form state
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    type: 'expense' as TransactionType,
+    payment_type: 'moeda' as PaymentType,
+    destination_bank_id: '',
+    amount: '',
+    description: '',
+    category: '',
+    date: new Date().toISOString().split('T')[0],
+  });
+  
+  // Filter state
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    type: 'all',
+    dateFrom: '',
+    dateTo: '',
+    category: '',
+  });
+  
+  // Custom category state
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+  
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    transactionId: '',
+    transactionName: ''
+  });
+  
+  // Load banks data on mount
+  React.useEffect(() => {
+    if (!isBanksDataLoaded) {
+      loadBanksData();
+    }
+  }, [isBanksDataLoaded, loadBanksData]);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'type') {
+      // Reset category when changing transaction type
+      setFormData((prev) => ({ ...prev, [name]: value, category: '' }));
+      setShowCustomCategory(false);
+      setCustomCategory('');
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    if (name === 'type') {
+      // Reset category when changing transaction type
+      setFormData((prev) => ({ ...prev, [name]: value, category: '' }));
+      setShowCustomCategory(false);
+      setCustomCategory('');
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+  
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+  
+  const handleFilterSelectChange = (name: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+  
+  const handleCategoryChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, category: value }));
+    setShowCustomCategory(false);
+    setCustomCategory('');
+  };
+  
+  const handleCustomCategoryClick = () => {
+    setShowCustomCategory(true);
+    setFormData((prev) => ({ ...prev, category: '' }));
+  };
+  
+  const handleCustomCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomCategory(value);
+    setFormData((prev) => ({ ...prev, category: value }));
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Debug: verificar a data antes de salvar
+    console.log('Data do formulário:', formData.date);
+    console.log('Data que será salva:', formData.date);
+    
+    addTransaction({
+      type: formData.type,
+      payment_type: formData.payment_type,
+      destination_bank_id: formData.destination_bank_id || undefined,
+      amount: parseFloat(formData.amount),
+      description: formData.description,
+      category: formData.category,
+      date: formData.date,
+    });
+    
+    // Reset form
+    setFormData({
+      type: 'expense',
+      payment_type: 'moeda',
+      destination_bank_id: '',
+      amount: '',
+      description: '',
+      category: '',
+      date: new Date().toISOString().split('T')[0],
+    });
+    
+    setShowCustomCategory(false);
+    setCustomCategory('');
+    setShowForm(false);
+  };
+  
+  const handleDeleteClick = (transaction: Transaction) => {
+    setConfirmModal({
+      isOpen: true,
+      transactionId: transaction.id,
+      transactionName: `${transaction.description} - R$ ${transaction.amount.toLocaleString('pt-BR')}`
+    });
+  };
+  
+  const handleConfirmDelete = () => {
+    if (confirmModal.transactionId) {
+      removeTransaction(confirmModal.transactionId);
+    }
+  };
+  
+  const handleCloseModal = () => {
+    setConfirmModal({
+      isOpen: false,
+      transactionId: '',
+      transactionName: ''
+    });
+  };
+  
+  // Filter transactions based on current filters
+  const filteredTransactions = transactions.filter((transaction) => {
+    // Filter by type
+    if (filters.type !== 'all' && transaction.type !== filters.type) {
+      return false;
+    }
+    
+    // Filter by date range
+    if (filters.dateFrom && new Date(transaction.date) < new Date(filters.dateFrom)) {
+      return false;
+    }
+    
+    if (filters.dateTo && new Date(transaction.date) > new Date(filters.dateTo)) {
+      return false;
+    }
+    
+    // Filter by category
+    if (filters.category && transaction.category !== filters.category) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  // Sort transactions by date (newest first)
+  const sortedTransactions = [...filteredTransactions].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+  
+  // Get unique categories for filter dropdown
+  const allCategories = Array.from(new Set(transactions.map(t => t.category)));
+  
+  // Get current predefined categories based on transaction type
+  const currentPredefinedCategories = formData.type === 'income' ? incomeCategories : expenseCategories;
+
+  // Bank options for selects
+  const bankOptions = [
+    { value: '', label: 'Nenhum banco específico' },
+    ...banks.map(bank => ({ value: bank.id, label: bank.name }))
+  ];
+
+  // Options for selects
+  const typeOptions = [
+    { value: 'income', label: 'Receita' },
+    { value: 'expense', label: 'Despesa' }
+  ];
+
+  const filterTypeOptions = [
+    { value: 'all', label: 'Todos' },
+    { value: 'income', label: 'Receitas' },
+    { value: 'expense', label: 'Despesas' }
+  ];
+
+  const filterCategoryOptions = [
+    { value: '', label: 'Todas' },
+    ...allCategories.map(category => ({ value: category, label: category }))
+  ];
+
+  const paymentTypeOptions = [
+    { value: 'pix', label: 'PIX' },
+    { value: 'credito', label: 'Cartão de Crédito' },
+    { value: 'debito', label: 'Cartão de Débito' },
+    { value: 'moeda', label: 'Dinheiro' },
+    { value: 'boleto', label: 'Boleto' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="page-title">Transações</h1>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="btn btn-outline w-full sm:w-auto"
+          >
+            <Filter className="h-5 w-5 mr-2" />
+            Filtros
+          </button>
+          <button 
+            onClick={() => setShowForm(true)}
+            className="btn btn-primary w-full sm:w-auto"
+          >
+            <PlusCircle className="h-5 w-5 mr-2" />
+            Nova Transação
+          </button>
+        </div>
+      </div>
+      
+      {/* Filters */}
+      {showFilters && (
+        <div className="card p-4">
+          <h2 className="form-title">Filtros</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo
+              </label>
+              <CustomSelect
+                value={filters.type}
+                onChange={(value) => handleFilterSelectChange('type', value)}
+                options={filterTypeOptions}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 mb-1">
+                Data Inicial
+              </label>
+              <input
+                id="dateFrom"
+                name="dateFrom"
+                type="date"
+                value={filters.dateFrom}
+                onChange={handleFilterChange}
+                className="input-field"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 mb-1">
+                Data Final
+              </label>
+              <input
+                id="dateTo"
+                name="dateTo"
+                type="date"
+                value={filters.dateTo}
+                onChange={handleFilterChange}
+                className="input-field"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categoria
+              </label>
+              <CustomSelect
+                value={filters.category}
+                onChange={(value) => handleFilterSelectChange('category', value)}
+                options={filterCategoryOptions}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Add Transaction Form */}
+      {showForm && (
+        <div className="card p-4 min-h-[500px]">
+          <h2 className="form-title">Nova Transação</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo
+                </label>
+                <CustomSelect
+                  value={formData.type}
+                  onChange={(value) => handleSelectChange('type', value)}
+                  options={typeOptions}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo de Pagamento
+                </label>
+                <CustomSelect
+                  value={formData.payment_type}
+                  onChange={(value) => handleSelectChange('payment_type', value)}
+                  options={paymentTypeOptions}
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
+                  Valor (R$)
+                </label>
+                <input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  className="input-field"
+                  placeholder="0,00"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+                </label>
+                <input
+                  id="description"
+                  name="description"
+                  type="text"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="input-field"
+                  placeholder="Ex: Salário, Supermercado, etc."
+                  required
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                  Categoria
+                </label>
+                {!showCustomCategory ? (
+                  <CategorySelector
+                    value={formData.category}
+                    onChange={handleCategoryChange}
+                    categories={currentPredefinedCategories}
+                    placeholder="Selecione uma categoria"
+                    onCustomCategory={handleCustomCategoryClick}
+                    showCustomOption={true}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={handleCustomCategoryChange}
+                    className="input-field"
+                    placeholder="Digite o nome da nova categoria"
+                    required
+                  />
+                )}
+              </div>
+              
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                  Data
+                </label>
+                <input
+                  id="date"
+                  name="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  className="input-field"
+                  required
+                />
+              </div>
+              
+              {/* Banco Destinado - apenas para receitas */}
+              {formData.type === 'income' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Banco Destinado
+                  </label>
+                  <CustomSelect
+                    value={formData.destination_bank_id}
+                    onChange={(value) => handleSelectChange('destination_bank_id', value)}
+                    options={bankOptions}
+                    placeholder="Selecione o banco de destino"
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false);
+                  setShowCustomCategory(false);
+                  setCustomCategory('');
+                }}
+                className="btn btn-outline w-full sm:w-auto"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary w-full sm:w-auto"
+              >
+                Salvar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      
+      {/* Transactions Table */}
+      <div className="card p-4">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Data
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Descrição
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Categoria
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Pagamento
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Banco Destinado
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Valor
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {sortedTransactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {transaction.date.split('-').reverse().join('/')}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">
+                    {transaction.description}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {transaction.category}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      transaction.payment_type === 'pix' ? 'bg-green-100 text-green-800' :
+                      transaction.payment_type === 'credito' ? 'bg-red-100 text-red-800' :
+                      transaction.payment_type === 'debito' ? 'bg-blue-100 text-blue-800' :
+                      transaction.payment_type === 'boleto' ? 'bg-orange-100 text-orange-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {transaction.payment_type === 'pix' && 'PIX'}
+                      {transaction.payment_type === 'credito' && 'Crédito'}
+                      {transaction.payment_type === 'debito' && 'Débito'}
+                      {transaction.payment_type === 'moeda' && 'Dinheiro'}
+                      {transaction.payment_type === 'boleto' && 'Boleto'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {transaction.destination_bank_id ? (
+                      (() => {
+                        const bank = banks.find(b => b.id === transaction.destination_bank_id);
+                        return bank ? `${bank.name}` : 'Banco não encontrado';
+                      })()
+                    ) : (
+                      transaction.type === 'income' ? 'Não especificado' : '-'
+                    )}
+                  </td>
+                  <td className={`px-4 py-3 whitespace-nowrap text-sm font-medium text-right ${
+                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {transaction.type === 'income' ? '+' : '-'} R$ {transaction.amount.toLocaleString('pt-BR')}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right">
+                    <button
+                      onClick={() => handleDeleteClick(transaction)}
+                      className="text-red-600 hover:text-red-800 transition-colors duration-200 p-1 rounded hover:bg-red-50"
+                      title="Excluir"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              
+              {sortedTransactions.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-4 text-center text-sm text-gray-500">
+                    Nenhuma transação encontrada
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        title="Excluir Transação"
+        message="Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita."
+        confirmText="Sim, Excluir"
+        cancelText="Cancelar"
+        type="danger"
+        itemName={confirmModal.transactionName}
+      />
+      
+      {/* Enhanced Scripture inspiration with special highlighting */}
+      <div className="scripture scripture-glow">
+        <div className="flex items-start">
+          <BookOpen className="h-6 w-6 text-gold-600 mr-4 mt-1 flex-shrink-0" />
+          <div>
+            <p className="mb-2">
+              "O que guarda a sua boca, conserva a sua alma; mas o que muito abre os seus lábios se arruinará."
+            </p>
+            <cite className="text-sm font-semibold text-gold-700 not-italic">
+              — Provérbios 13:3
+            </cite>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Transactions;

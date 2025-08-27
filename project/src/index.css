@@ -1,0 +1,331 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply font-opensans text-gray-900 bg-gray-100;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-montserrat font-semibold;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-6 py-2.5 rounded-lg font-medium transition-all duration-150 inline-flex items-center justify-center shadow-sm hover:shadow-md;
+  }
+  
+  .btn-primary {
+    @apply bg-olive-600 text-white hover:bg-olive-700 focus:ring-2 focus:ring-olive-500 focus:ring-opacity-50 shadow-md hover:shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply bg-azure-600 text-white hover:bg-azure-700 focus:ring-2 focus:ring-azure-500 focus:ring-opacity-50 shadow-md hover:shadow-lg;
+  }
+  
+  .btn-gold {
+    @apply bg-gold-500 text-gray-800 hover:bg-gold-600 focus:ring-2 focus:ring-gold-400 focus:ring-opacity-50 shadow-md hover:shadow-lg;
+  }
+  
+  .btn-outline {
+    @apply border border-olive-600 text-olive-600 hover:bg-olive-50 focus:ring-2 focus:ring-olive-500 focus:ring-opacity-30 shadow-sm hover:shadow-md;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-150;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-azure-500 focus:border-azure-500 focus:outline-none bg-white text-gray-900 shadow-sm focus:shadow-md transition-shadow duration-150;
+  }
+  
+  /* Enhanced Scripture Styling - The Main Highlight */
+  .scripture {
+    @apply relative overflow-hidden rounded-xl shadow-2xl border-2 border-gold-300 bg-gradient-to-br from-gold-50 via-white to-gold-100 p-6 my-8 transform hover:scale-[1.02] transition-all duration-200;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(245, 201, 53, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(143, 168, 75, 0.1) 0%, transparent 50%);
+  }
+  
+  .scripture::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400;
+  }
+  
+  .scripture::after {
+    content: '"';
+    @apply absolute top-2 left-2 text-6xl font-serif text-gold-300 opacity-30 leading-none;
+    font-family: 'Times New Roman', serif;
+  }
+  
+  .scripture p {
+    @apply text-lg font-medium text-gray-800 italic leading-relaxed relative z-10 mb-0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    font-family: 'Georgia', serif;
+  }
+  
+  .scripture-banner {
+    @apply relative overflow-hidden rounded-2xl shadow-2xl border-[3px] border-gold-400 bg-gradient-to-r from-gold-100 via-gold-50 to-gold-100 p-8 my-8 transform hover:scale-[1.01] transition-all duration-200;
+    background-image: 
+      radial-gradient(circle at 30% 70%, rgba(245, 201, 53, 0.15) 0%, transparent 60%),
+      radial-gradient(circle at 70% 30%, rgba(143, 168, 75, 0.15) 0%, transparent 60%);
+  }
+  
+  .scripture-banner::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400;
+  }
+  
+  .scripture-banner::after {
+    content: '✝';
+    @apply absolute top-4 right-4 text-4xl text-gold-400 opacity-40;
+  }
+  
+  .scripture-banner .flex {
+    @apply relative z-10;
+  }
+  
+  .scripture-banner p {
+    @apply text-xl font-medium text-gold-900 italic leading-relaxed;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-family: 'Georgia', serif;
+  }
+  
+  /* Special highlight for explanation banners with spiritual content */
+  .explanation-banner {
+    @apply bg-gradient-to-r from-gold-50 via-gold-50 to-gold-50 border-2 border-gold-300 rounded-xl p-4 mb-6 shadow-lg hover:shadow-xl transition-all duration-200;
+    background-image: 
+      radial-gradient(circle at 25% 75%, rgba(245, 201, 53, 0.1) 0%, transparent 50%);
+  }
+  
+  /* Page titles */
+  .page-title {
+    @apply text-2xl font-bold text-gray-800 font-montserrat;
+  }
+  
+  /* Section titles */
+  .section-title {
+    @apply text-lg font-semibold text-gray-800 font-montserrat;
+  }
+  
+  /* Form titles */
+  .form-title {
+    @apply text-lg font-semibold mb-4 text-gray-800 font-montserrat;
+  }
+  
+  /* Novos componentes com sombras */
+  .stats-card {
+    @apply bg-gray-50 p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-150;
+  }
+  
+  .nav-item {
+    @apply flex items-center px-4 py-3 rounded-lg transition-all duration-150;
+  }
+  
+  .nav-item-active {
+    @apply bg-olive-100 text-olive-800 border border-olive-200 shadow-sm;
+  }
+  
+  .nav-item-inactive {
+    @apply text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm;
+  }
+  
+  .header-banner {
+    @apply text-sm bg-olive-100 text-olive-800 py-2 px-4 rounded-full italic border border-olive-200 shadow-sm;
+  }
+  
+  .form-container {
+    @apply w-full max-w-md bg-white p-8 rounded-xl shadow-xl border border-gray-200;
+  }
+  
+  .table-container {
+    @apply overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+  
+  .progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2.5 mb-1 shadow-inner;
+  }
+  
+  .progress-fill {
+    @apply h-2.5 rounded-full shadow-sm;
+  }
+  
+  .sidebar {
+    @apply bg-white border-r border-gray-200 shadow-xl;
+  }
+  
+  .sidebar-header {
+    @apply p-4 border-b border-gray-200 bg-gray-50 shadow-sm;
+  }
+  
+  .sidebar-footer {
+    @apply p-4 border-t border-gray-200 mt-auto bg-gray-50 shadow-sm;
+  }
+  
+  .main-header {
+    @apply bg-white shadow-md border-b border-gray-200;
+  }
+  
+  .filter-container {
+    @apply card p-4 shadow-md;
+  }
+  
+  .chart-container {
+    @apply card p-4 shadow-md hover:shadow-lg transition-shadow duration-150;
+  }
+  
+  .goal-card {
+    @apply border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-150;
+  }
+  
+  .mobile-overlay {
+    @apply fixed inset-0 bg-gray-900 bg-opacity-60 z-20 transition-opacity duration-150;
+  }
+  
+  /* Chart styling optimizations for mobile */
+  .recharts-legend-wrapper {
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    margin-top: 8px !important;
+  }
+  
+  .recharts-legend-item-text {
+    font-size: 9px !important;
+    font-weight: 500 !important;
+  }
+  
+  .recharts-default-legend .recharts-legend-item {
+    margin-right: 6px !important;
+    margin-bottom: 3px !important;
+  }
+  
+  /* Force legend to bottom position */
+  .recharts-legend-wrapper {
+    position: relative !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  
+  /* Pie chart label styling - smaller and positioned better */
+  .recharts-pie-label-text {
+    font-size: 8px !important;
+    font-weight: 600 !important;
+    fill: #374151 !important;
+  }
+  
+  /* Tooltip styling */
+  .recharts-tooltip-wrapper {
+    font-size: 11px !important;
+  }
+  
+  /* Axis labels styling - optimized for mobile */
+  .recharts-cartesian-axis-tick-value {
+    font-size: 9px !important;
+  }
+  
+  .recharts-xAxis .recharts-cartesian-axis-tick-value {
+    font-size: 8px !important;
+  }
+  
+  .recharts-yAxis .recharts-cartesian-axis-tick-value {
+    font-size: 9px !important;
+  }
+  
+  /* Legend container adjustments for mobile */
+  .recharts-legend-wrapper .recharts-default-legend {
+    padding: 4px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  /* Reduce legend item spacing for mobile */
+  .recharts-legend-item {
+    margin: 0 3px 2px 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+  
+  /* Make legend text more compact */
+  .recharts-legend-item-text {
+    margin-left: 2px !important;
+  }
+  
+  /* Mobile-specific chart adjustments */
+  @media (max-width: 640px) {
+    /* Hide all legends on mobile */
+    .recharts-legend-wrapper {
+      display: none !important;
+    }
+    
+    .recharts-legend-item-text {
+      font-size: 7px !important;
+    }
+    
+    .recharts-pie-label-text {
+      font-size: 6px !important;
+    }
+    
+    .recharts-cartesian-axis-tick-value {
+      font-size: 7px !important;
+    }
+    
+    .recharts-xAxis .recharts-cartesian-axis-tick-value {
+      font-size: 6px !important;
+    }
+    
+    /* Hide pie chart labels on very small screens to prevent overlap */
+    .recharts-pie-label-text {
+      display: none !important;
+    }
+  }
+  
+  /* Special animations for scripture elements */
+  .scripture-glow {
+    animation: subtleGlow 3s ease-in-out infinite alternate;
+  }
+  
+  @keyframes subtleGlow {
+    from {
+      box-shadow: 0 10px 25px rgba(245, 201, 53, 0.2), 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    to {
+      box-shadow: 0 15px 35px rgba(245, 201, 53, 0.3), 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-in;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Special highlight for spiritual content */
+.spiritual-highlight {
+  @apply bg-gradient-to-r from-gold-100 via-gold-50 to-gold-100 border-l-4 border-gold-500 pl-6 py-4 rounded-r-xl shadow-lg;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(245, 201, 53, 0.1) 0%, transparent 50%);
+}
