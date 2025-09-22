@@ -346,30 +346,45 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    // Botoes de ação no topo da página
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="page-title">Dashboard</h1>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Link
-            to="/expenses"
-            className="px-4 py-2 bg-azure-600 hover:bg-azure-700 text-white text-sm font-medium rounded-lg transition-all duration-200 inline-flex items-center justify-center shadow-sm hover:shadow-md"
-          >
-            <TrendingDown className="h-4 w-4 mr-2" />
-            Nova Despesa
-          </Link>
-          <Link
-            to="/transactions"
-            className="px-4 py-2 bg-olive-600 hover:bg-olive-700 text-white text-sm font-medium rounded-lg transition-all duration-200 inline-flex items-center justify-center shadow-sm hover:shadow-md"
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Nova Transação
-          </Link>
+    <div className="space-y-8">
+      {/* Header com gradiente, ícone e sombra */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-olive-50 via-azure-50 to-gold-50 rounded-2xl p-6 border border-olive-200 shadow-lg mb-2">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-olive-400 via-azure-500 to-gold-500"></div>
+        <div className="absolute top-4 right-4 opacity-20">
+          <BarChart3 className="h-16 w-16 text-olive-400" />
+        </div>
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Dashboard
+              </h1>
+              <p className="text-gray-700">
+                Resumo financeiro e visão geral do seu planejamento
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Link
+                to="/expenses"
+                className="px-4 py-2 bg-azure-600 hover:bg-azure-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 inline-flex items-center justify-center"
+              >
+                <TrendingDown className="h-4 w-4 mr-2" />
+                Nova Despesa
+              </Link>
+              <Link
+                to="/transactions"
+                className="px-4 py-2 bg-olive-600 hover:bg-olive-700 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 inline-flex items-center justify-center"
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Nova Transação
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Current Month Indicator */}
-      <div className="bg-olive-50 border-l-4 border-olive-400 p-4 rounded-r-lg">
+      <div className="bg-gradient-to-r from-olive-50 via-azure-50 to-gold-50 border-l-4 border-olive-400 p-4 rounded-r-lg shadow-md">
         <div className="flex items-center">
           <Calendar className="h-5 w-5 text-olive-600 mr-3" />
           <div>
@@ -391,7 +406,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Enhanced Stats cards - Improved layout for better text visibility */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         <Link
           to="/transactions"
           className="card p-4 hover:bg-gray-50 rounded-lg transition"

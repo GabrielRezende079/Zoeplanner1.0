@@ -37,8 +37,10 @@ const getPasswordStrength = (password: string): number => {
 
 // Label de força
 const getStrengthLabel = (strength: number) => {
-  if (strength <= 2) return { label: "Fraca", color: "text-red-600", bg: "bg-red-500" };
-  if (strength <= 4) return { label: "Média", color: "text-yellow-600", bg: "bg-yellow-500" };
+  if (strength <= 2)
+    return { label: "Fraca", color: "text-red-600", bg: "bg-red-500" };
+  if (strength <= 4)
+    return { label: "Média", color: "text-yellow-600", bg: "bg-yellow-500" };
   return { label: "Forte", color: "text-green-600", bg: "bg-green-500" };
 };
 
@@ -73,7 +75,9 @@ export default function ResetPassword() {
         }
 
         if (!data.session) {
-          setError("Sessão não encontrada. Link pode estar inválido ou expirado.");
+          setError(
+            "Sessão não encontrada. Link pode estar inválido ou expirado."
+          );
           setIsValidLink(false);
           return;
         }
@@ -83,7 +87,11 @@ export default function ResetPassword() {
         setDebugInfo("Sessão válida obtida a partir do hash do Supabase.");
 
         // limpa o hash da URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
       } catch (err) {
         console.error("Erro inesperado:", err);
         setError("Erro inesperado ao validar o link.");
@@ -125,7 +133,8 @@ export default function ResetPassword() {
         navigate("/login");
       }, 3000);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro desconhecido";
       console.error("Password reset error:", err);
       setError(errorMessage);
     } finally {
@@ -136,11 +145,21 @@ export default function ResetPassword() {
   // 🔄 Loading inicial
   if (isCheckingLink) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gold-50 via-olive-50 to-azure-50">
+        <div className="max-w-md w-full p-8 rounded-2xl border-2 border-gold-200 shadow-xl bg-white">
+          <div className="text-center mb-6">
+            <Shield className="h-10 w-10 text-green-600 mx-auto" />
+            <h2 className="text-2xl font-bold mt-2">
+              Verificando link de recuperação...
+            </h2>
+          </div>
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando link de recuperação...</p>
-          {debugInfo && <pre className="text-xs text-gray-500 mt-2">Debug: {debugInfo}</pre>}
+          <p className="text-gray-600">
+            Aguarde enquanto validamos seu acesso.
+          </p>
+          {debugInfo && (
+            <pre className="text-xs text-gray-500 mt-2">Debug: {debugInfo}</pre>
+          )}
         </div>
       </div>
     );
@@ -149,12 +168,19 @@ export default function ResetPassword() {
   // ❌ Link inválido
   if (!isValidLink) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <AlertCircle className="h-10 w-10 text-red-600 mx-auto" />
-          <h2 className="text-xl font-bold mt-2">Link Inválido ou Expirado</h2>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gold-50 via-olive-50 to-azure-50">
+        <div className="max-w-md w-full p-8 rounded-2xl border-2 border-red-200 shadow-xl bg-white">
+          <div className="text-center mb-6">
+            <AlertCircle className="h-10 w-10 text-red-600 mx-auto" />
+            <h2 className="text-xl font-bold mt-2">
+              Link Inválido ou Expirado
+            </h2>
+          </div>
           <p className="text-gray-600">{error}</p>
-          <Link to="/login" className="btn btn-primary mt-4 inline-flex items-center">
+          <Link
+            to="/login"
+            className="btn btn-primary mt-4 inline-flex items-center"
+          >
             <RefreshCw className="h-4 w-4 mr-2" /> Solicitar Novo Link
           </Link>
         </div>
@@ -165,11 +191,17 @@ export default function ResetPassword() {
   // ✅ Sucesso
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <CheckCircle className="h-10 w-10 text-green-600 mx-auto" />
-          <h2 className="text-xl font-bold mt-2">Senha redefinida com sucesso!</h2>
-          <p className="text-gray-600">Você será redirecionado em instantes...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gold-50 via-olive-50 to-azure-50">
+        <div className="max-w-md w-full p-8 rounded-2xl border-2 border-green-200 shadow-xl bg-white">
+          <div className="text-center mb-6">
+            <CheckCircle className="h-10 w-10 text-green-600 mx-auto" />
+            <h2 className="text-xl font-bold mt-2">
+              Senha redefinida com sucesso!
+            </h2>
+          </div>
+          <p className="text-gray-600">
+            Você será redirecionado em instantes...
+          </p>
         </div>
       </div>
     );
@@ -180,11 +212,14 @@ export default function ResetPassword() {
   const strengthInfo = getStrengthLabel(passwordStrength);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gold-50 via-olive-50 to-azure-50 py-12 px-4">
+      <div className="max-w-md w-full p-8 rounded-2xl border-2 border-gold-200 shadow-xl bg-white">
         <div className="text-center mb-6">
-          <Shield className="h-8 w-8 text-green-600 mx-auto" />
+          <Shield className="h-10 w-10 text-green-600 mx-auto" />
           <h2 className="text-2xl font-bold mt-2">Redefinir Senha</h2>
+          <p className="text-gray-700">
+            Escolha uma nova senha forte para proteger sua conta
+          </p>
         </div>
 
         {error && (
@@ -217,7 +252,9 @@ export default function ResetPassword() {
               <div className="mt-2">
                 <div className="flex justify-between text-xs mb-1">
                   <span>Força da senha:</span>
-                  <span className={strengthInfo.color}>{strengthInfo.label}</span>
+                  <span className={strengthInfo.color}>
+                    {strengthInfo.label}
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -231,7 +268,9 @@ export default function ResetPassword() {
 
           {/* Confirmar senha */}
           <div>
-            <label className="block text-sm font-medium mb-1">Confirmar Senha</label>
+            <label className="block text-sm font-medium mb-1">
+              Confirmar Senha
+            </label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -265,6 +304,26 @@ export default function ResetPassword() {
             <ArrowLeft className="inline h-4 w-4 mr-1" />
             Voltar ao login
           </Link>
+        </div>
+
+        {/* Enhanced Scripture Inspiration Section */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-olive-50 via-gold-50 to-azure-50 rounded-2xl p-6 border-2 border-gold-300 shadow-xl mt-8">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-olive-500 via-gold-500 to-azure-500"></div>
+          <div className="absolute top-4 right-4 opacity-10">
+            <Leaf className="h-16 w-16 text-gold-500" />
+          </div>
+          <div className="relative z-10 text-center">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              Reflexão Bíblica
+            </h3>
+            <p className="text-gold-800 italic text-lg mb-2">
+              "Cria em mim, ó Deus, um coração puro e renova dentro de mim um
+              espírito inabalável."
+            </p>
+            <cite className="text-sm font-semibold text-gold-700 not-italic block">
+              — Salmos 51:10
+            </cite>
+          </div>
         </div>
       </div>
     </div>

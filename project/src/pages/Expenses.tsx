@@ -5,7 +5,6 @@ import {
   Trash2,
   Filter,
   Edit3,
-  Check,
   X,
   Clock,
   CheckCircle,
@@ -24,11 +23,8 @@ import {
   TrendingDown,
   Calendar,
   Save,
-  ChevronDown,
-  ChevronUp,
   RefreshCw,
   CalendarDays,
-  Repeat,
 } from "lucide-react";
 import CategorySelector from "../components/CategorySelector";
 import CustomSelect from "../components/CustomSelect";
@@ -124,34 +120,30 @@ const Expenses: React.FC = () => {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Reset billing fields when changing billing type
     if (name === "billing_type") {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        billing_type: value as "unique" | "monthly" | "yearly",
         billing_day: "",
         billing_month: "",
       }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-
     if (submitError) setSubmitError("");
   };
 
   const handleEditSelectChange = (name: string, value: string) => {
-    setEditFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Reset billing fields when changing billing type
     if (name === "billing_type") {
       setEditFormData((prev) => ({
         ...prev,
-        [name]: value,
+        billing_type: value as "unique" | "monthly" | "yearly" | undefined,
         billing_day: undefined,
         billing_month: undefined,
       }));
+    } else {
+      setEditFormData((prev) => ({ ...prev, [name]: value }));
     }
-
     if (updateError) setUpdateError("");
   };
 
@@ -595,13 +587,14 @@ const Expenses: React.FC = () => {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="page-title">Despesas</h1>
+    <div className="space-y-8">
+      {/* Gradient Header */}
+      <div className="rounded-2xl border-2 border-gold-200 shadow-xl bg-gradient-to-br from-gold-50 via-white to-olive-50 px-6 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-3xl font-bold text-olive-900 tracking-tight drop-shadow-lg">Despesas</h1>
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="btn btn-outline w-full sm:w-auto"
+            className="btn btn-outline w-full sm:w-auto border-gold-300 text-olive-900 hover:bg-gold-50"
           >
             <Filter className="h-5 w-5 mr-2" />
             Filtros
@@ -618,7 +611,7 @@ const Expenses: React.FC = () => {
                 }
               }, 100);
             }}
-            className="btn btn-primary w-full sm:w-auto"
+            className="btn btn-primary w-full sm:w-auto bg-gradient-to-r from-gold-400 to-olive-400 border-gold-300 text-white shadow-lg"
           >
             <PlusCircle className="h-5 w-5 mr-2" />
             Nova Despesa
@@ -626,14 +619,14 @@ const Expenses: React.FC = () => {
         </div>
       </div>
 
-      {/* Monthly Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card p-4">
+      {/* Monthly Summary - Enhanced Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="rounded-2xl border-2 border-red-200 shadow-lg bg-gradient-to-br from-red-50 via-white to-gold-50 p-6">
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
               <TrendingDown className="h-5 w-5 text-red-600" />
             </div>
-            <h3 className="ml-3 text-lg font-semibold">Total do Mês</h3>
+            <h3 className="ml-3 text-lg font-semibold text-red-800">Total do Mês</h3>
           </div>
           <p className="text-2xl font-bold text-red-600">
             R$ {monthlyTotal.toLocaleString("pt-BR")}
@@ -646,35 +639,33 @@ const Expenses: React.FC = () => {
           </p>
         </div>
 
-        <div className="card p-4">
+        <div className="rounded-2xl border-2 border-green-200 shadow-lg bg-gradient-to-br from-green-50 via-white to-gold-50 p-6">
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
-            <h3 className="ml-3 text-lg font-semibold">Pagas</h3>
+            <h3 className="ml-3 text-lg font-semibold text-green-800">Pagas</h3>
           </div>
           <p className="text-2xl font-bold text-green-600">
             R$ {totalPaid.toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            {filteredExpenses.filter((e) => e.status === "paid").length}{" "}
-            despesas
+            {filteredExpenses.filter((e) => e.status === "paid").length} despesas
           </p>
         </div>
 
-        <div className="card p-4">
+        <div className="rounded-2xl border-2 border-orange-200 shadow-lg bg-gradient-to-br from-orange-50 via-white to-gold-50 p-6">
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
               <Clock className="h-5 w-5 text-orange-600" />
             </div>
-            <h3 className="ml-3 text-lg font-semibold">Pendentes</h3>
+            <h3 className="ml-3 text-lg font-semibold text-orange-800">Pendentes</h3>
           </div>
           <p className="text-2xl font-bold text-orange-600">
             R$ {totalPending.toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            {filteredExpenses.filter((e) => e.status === "pending").length}{" "}
-            despesas
+            {filteredExpenses.filter((e) => e.status === "pending").length} despesas
           </p>
         </div>
       </div>
@@ -1302,7 +1293,7 @@ const Expenses: React.FC = () => {
       />
 
       {/* Scripture inspiration */}
-      <div className="card p-4">
+      <div className="card p-6 bg-gradient-to-br from-gold-50 via-white to-olive-50 border-2 border-gold-200 shadow-xl">
         <h2 className="section-title">Reflexão Bíblica</h2>
         <p className="text-gray-700 mb-4">
           Controlar nossas despesas é um ato de mordomia responsável. Quando
