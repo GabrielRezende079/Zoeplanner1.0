@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useFinance, Expense } from '../stores/financeStore';
-import { 
-  PlusCircle, 
-  Trash2, 
-  Filter, 
-  Edit3, 
-  Check, 
-  X, 
+import React, { useState } from "react";
+import { useFinance, Expense } from "../stores/financeStore";
+import {
+  PlusCircle,
+  Trash2,
+  Filter,
+  Edit3,
+  Check,
+  X,
   Clock,
   CheckCircle,
   ShoppingCart,
@@ -28,259 +28,296 @@ import {
   ChevronUp,
   RefreshCw,
   CalendarDays,
-  Repeat
-} from 'lucide-react';
-import CategorySelector from '../components/CategorySelector';
-import CustomSelect from '../components/CustomSelect';
-import ConfirmationModal from '../components/ConfirmationModal';
+  Repeat,
+} from "lucide-react";
+import CategorySelector from "../components/CategorySelector";
+import CustomSelect from "../components/CustomSelect";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const Expenses: React.FC = () => {
-  const { expenses, addExpense, updateExpense, removeExpense, getMonthlyExpenses } = useFinance();
-  
+  const {
+    expenses,
+    addExpense,
+    updateExpense,
+    removeExpense,
+    getMonthlyExpenses,
+  } = useFinance();
+
   // Predefined categories with icons
   const expenseCategories = [
-    { name: 'Alimentação', icon: Utensils },
-    { name: 'Moradia', icon: Home },
-    { name: 'Transporte', icon: Car },
-    { name: 'Saúde', icon: Stethoscope },
-    { name: 'Educação', icon: GraduationCap },
-    { name: 'Lazer', icon: Gamepad2 },
-    { name: 'Vestuário', icon: Shirt },
-    { name: 'Supermercado', icon: ShoppingCart },
-    { name: 'Combustível', icon: Fuel },
-    { name: 'Presentes', icon: Gift },
-    { name: 'Doações', icon: Heart },
-    { name: 'Outros', icon: MoreHorizontal }
+    { name: "Alimentação", icon: Utensils },
+    { name: "Moradia", icon: Home },
+    { name: "Transporte", icon: Car },
+    { name: "Saúde", icon: Stethoscope },
+    { name: "Educação", icon: GraduationCap },
+    { name: "Lazer", icon: Gamepad2 },
+    { name: "Vestuário", icon: Shirt },
+    { name: "Supermercado", icon: ShoppingCart },
+    { name: "Combustível", icon: Fuel },
+    { name: "Presentes", icon: Gift },
+    { name: "Doações", icon: Heart },
+    { name: "Outros", icon: MoreHorizontal },
   ];
-  
+
   // Form state
   const [showForm, setShowForm] = useState(false);
+  const formRef = React.useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    amount: '',
-    category: '',
-    date: new Date().toISOString().split('T')[0],
-    status: 'pending' as 'paid' | 'pending',
-    notes: '',
-    billing_type: 'unique' as 'unique' | 'monthly' | 'yearly',
-    billing_day: '',
-    billing_month: '',
+    name: "",
+    amount: "",
+    category: "",
+    date: new Date().toISOString().split("T")[0],
+    status: "pending" as "paid" | "pending",
+    notes: "",
+    billing_type: "unique" as "unique" | "monthly" | "yearly",
+    billing_day: "",
+    billing_month: "",
   });
-  
+
   // Loading state for form submission
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  
+  const [submitError, setSubmitError] = useState("");
+
   // Edit state - now using expanded edit mode
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<Expense>>({});
   const [isUpdating, setIsUpdating] = useState(false);
-  const [updateError, setUpdateError] = useState('');
-  
+  const [updateError, setUpdateError] = useState("");
+
   // Filter state
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    category: '',
-    status: 'all',
-    dateFrom: '',
-    dateTo: '',
-    billing_type: 'all',
+    category: "",
+    status: "all",
+    dateFrom: "",
+    dateTo: "",
+    billing_type: "all",
   });
-  
+
   // Custom category state
   const [showCustomCategory, setShowCustomCategory] = useState(false);
-  const [customCategory, setCustomCategory] = useState('');
-  
+  const [customCategory, setCustomCategory] = useState("");
+
   // Confirmation modal state
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
-    expenseId: '',
-    expenseName: ''
+    expenseId: "",
+    expenseName: "",
   });
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear any previous errors when user starts typing
-    if (submitError) setSubmitError('');
+    if (submitError) setSubmitError("");
   };
-  
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setEditFormData((prev) => ({ ...prev, [name]: value }));
     // Clear any previous errors when user starts typing
-    if (updateError) setUpdateError('');
+    if (updateError) setUpdateError("");
   };
-  
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Reset billing fields when changing billing type
-    if (name === 'billing_type') {
-      setFormData((prev) => ({ 
-        ...prev, 
+    if (name === "billing_type") {
+      setFormData((prev) => ({
+        ...prev,
         [name]: value,
-        billing_day: '',
-        billing_month: ''
+        billing_day: "",
+        billing_month: "",
       }));
     }
-    
-    if (submitError) setSubmitError('');
+
+    if (submitError) setSubmitError("");
   };
-  
+
   const handleEditSelectChange = (name: string, value: string) => {
     setEditFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Reset billing fields when changing billing type
-    if (name === 'billing_type') {
-      setEditFormData((prev) => ({ 
-        ...prev, 
+    if (name === "billing_type") {
+      setEditFormData((prev) => ({
+        ...prev,
         [name]: value,
         billing_day: undefined,
-        billing_month: undefined
+        billing_month: undefined,
       }));
     }
-    
-    if (updateError) setUpdateError('');
+
+    if (updateError) setUpdateError("");
   };
-  
+
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleFilterSelectChange = (name: string, value: string) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value }));
     setShowCustomCategory(false);
-    setCustomCategory('');
-    if (submitError) setSubmitError('');
+    setCustomCategory("");
+    if (submitError) setSubmitError("");
   };
-  
+
   const handleEditCategoryChange = (value: string) => {
     setEditFormData((prev) => ({ ...prev, category: value }));
-    if (updateError) setUpdateError('');
+    if (updateError) setUpdateError("");
   };
-  
+
   const handleCustomCategoryClick = () => {
     setShowCustomCategory(true);
-    setFormData((prev) => ({ ...prev, category: '' }));
+    setFormData((prev) => ({ ...prev, category: "" }));
   };
-  
-  const handleCustomCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleCustomCategoryChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value;
     setCustomCategory(value);
     setFormData((prev) => ({ ...prev, category: value }));
-    if (submitError) setSubmitError('');
+    if (submitError) setSubmitError("");
   };
-  
+
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setSubmitError('Nome da despesa é obrigatório');
+      setSubmitError("Nome da despesa é obrigatório");
       return false;
     }
-    
+
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      setSubmitError('Valor deve ser maior que zero');
+      setSubmitError("Valor deve ser maior que zero");
       return false;
     }
-    
+
     if (!formData.category.trim()) {
-      setSubmitError('Categoria é obrigatória');
+      setSubmitError("Categoria é obrigatória");
       return false;
     }
-    
+
     if (!formData.date) {
-      setSubmitError('Data é obrigatória');
+      setSubmitError("Data é obrigatória");
       return false;
     }
-    
+
     // Validate billing fields
-    if (formData.billing_type === 'monthly') {
-      if (!formData.billing_day || parseInt(formData.billing_day) < 1 || parseInt(formData.billing_day) > 31) {
-        setSubmitError('Para cobrança mensal, o dia deve estar entre 1 e 31');
+    if (formData.billing_type === "monthly") {
+      if (
+        !formData.billing_day ||
+        parseInt(formData.billing_day) < 1 ||
+        parseInt(formData.billing_day) > 31
+      ) {
+        setSubmitError("Para cobrança mensal, o dia deve estar entre 1 e 31");
         return false;
       }
     }
-    
-    if (formData.billing_type === 'yearly') {
-      if (!formData.billing_day || parseInt(formData.billing_day) < 1 || parseInt(formData.billing_day) > 31) {
-        setSubmitError('Para cobrança anual, o dia deve estar entre 1 e 31');
+
+    if (formData.billing_type === "yearly") {
+      if (
+        !formData.billing_day ||
+        parseInt(formData.billing_day) < 1 ||
+        parseInt(formData.billing_day) > 31
+      ) {
+        setSubmitError("Para cobrança anual, o dia deve estar entre 1 e 31");
         return false;
       }
-      if (!formData.billing_month || parseInt(formData.billing_month) < 1 || parseInt(formData.billing_month) > 12) {
-        setSubmitError('Para cobrança anual, o mês deve estar entre 1 e 12');
+      if (
+        !formData.billing_month ||
+        parseInt(formData.billing_month) < 1 ||
+        parseInt(formData.billing_month) > 12
+      ) {
+        setSubmitError("Para cobrança anual, o mês deve estar entre 1 e 12");
         return false;
       }
     }
-    
+
     return true;
   };
-  
+
   const validateEditForm = () => {
     if (!editFormData.name?.trim()) {
-      setUpdateError('Nome da despesa é obrigatório');
+      setUpdateError("Nome da despesa é obrigatório");
       return false;
     }
-    
+
     if (!editFormData.amount || editFormData.amount <= 0) {
-      setUpdateError('Valor deve ser maior que zero');
+      setUpdateError("Valor deve ser maior que zero");
       return false;
     }
-    
+
     if (!editFormData.category?.trim()) {
-      setUpdateError('Categoria é obrigatória');
+      setUpdateError("Categoria é obrigatória");
       return false;
     }
-    
+
     if (!editFormData.date) {
-      setUpdateError('Data é obrigatória');
+      setUpdateError("Data é obrigatória");
       return false;
     }
-    
+
     // Validate billing fields
-    if (editFormData.billing_type === 'monthly') {
-      if (!editFormData.billing_day || editFormData.billing_day < 1 || editFormData.billing_day > 31) {
-        setUpdateError('Para cobrança mensal, o dia deve estar entre 1 e 31');
+    if (editFormData.billing_type === "monthly") {
+      if (
+        !editFormData.billing_day ||
+        editFormData.billing_day < 1 ||
+        editFormData.billing_day > 31
+      ) {
+        setUpdateError("Para cobrança mensal, o dia deve estar entre 1 e 31");
         return false;
       }
     }
-    
-    if (editFormData.billing_type === 'yearly') {
-      if (!editFormData.billing_day || editFormData.billing_day < 1 || editFormData.billing_day > 31) {
-        setUpdateError('Para cobrança anual, o dia deve estar entre 1 e 31');
+
+    if (editFormData.billing_type === "yearly") {
+      if (
+        !editFormData.billing_day ||
+        editFormData.billing_day < 1 ||
+        editFormData.billing_day > 31
+      ) {
+        setUpdateError("Para cobrança anual, o dia deve estar entre 1 e 31");
         return false;
       }
-      if (!editFormData.billing_month || editFormData.billing_month < 1 || editFormData.billing_month > 12) {
-        setUpdateError('Para cobrança anual, o mês deve estar entre 1 e 12');
+      if (
+        !editFormData.billing_month ||
+        editFormData.billing_month < 1 ||
+        editFormData.billing_month > 12
+      ) {
+        setUpdateError("Para cobrança anual, o mês deve estar entre 1 e 12");
         return false;
       }
     }
-    
+
     return true;
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous errors
-    setSubmitError('');
-    
+    setSubmitError("");
+
     // Validate form
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Debug: verificar a data antes de salvar
-      console.log('Data do formulário (despesa):', formData.date);
-      
-      const expenseData: Omit<Expense, 'id'> = {
+      console.log("Data do formulário (despesa):", formData.date);
+
+      const expenseData: Omit<Expense, "id"> = {
         name: formData.name.trim(),
         amount: parseFloat(formData.amount),
         category: formData.category.trim(),
@@ -288,38 +325,43 @@ const Expenses: React.FC = () => {
         status: formData.status,
         notes: formData.notes.trim(),
         billing_type: formData.billing_type,
-        billing_day: formData.billing_type === 'unique' ? undefined : parseInt(formData.billing_day),
-        billing_month: formData.billing_type === 'yearly' ? parseInt(formData.billing_month) : undefined,
+        billing_day:
+          formData.billing_type === "unique"
+            ? undefined
+            : parseInt(formData.billing_day),
+        billing_month:
+          formData.billing_type === "yearly"
+            ? parseInt(formData.billing_month)
+            : undefined,
       };
-      
-      console.log('Data que será salva (despesa):', expenseData.date);
+
+      console.log("Data que será salva (despesa):", expenseData.date);
       await addExpense(expenseData);
-      
+
       // Reset form on success
       setFormData({
-        name: '',
-        amount: '',
-        category: '',
-        date: new Date().toISOString().split('T')[0],
-        status: 'pending',
-        notes: '',
-        billing_type: 'unique',
-        billing_day: '',
-        billing_month: '',
+        name: "",
+        amount: "",
+        category: "",
+        date: new Date().toISOString().split("T")[0],
+        status: "pending",
+        notes: "",
+        billing_type: "unique",
+        billing_day: "",
+        billing_month: "",
       });
-      
+
       setShowCustomCategory(false);
-      setCustomCategory('');
+      setCustomCategory("");
       setShowForm(false);
-      
     } catch (error) {
-      console.error('Error adding expense:', error);
-      setSubmitError('Erro ao adicionar despesa. Tente novamente.');
+      console.error("Error adding expense:", error);
+      setSubmitError("Erro ao adicionar despesa. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const startEditing = (expense: Expense) => {
     setEditingExpenseId(expense.id);
     setEditFormData({
@@ -328,215 +370,228 @@ const Expenses: React.FC = () => {
       category: expense.category,
       date: expense.date,
       status: expense.status,
-      notes: expense.notes || '',
-      billing_type: expense.billing_type || 'unique',
+      notes: expense.notes || "",
+      billing_type: expense.billing_type || "unique",
       billing_day: expense.billing_day,
       billing_month: expense.billing_month,
     });
-    setUpdateError('');
+    setUpdateError("");
   };
-  
+
   const cancelEditing = () => {
     setEditingExpenseId(null);
     setEditFormData({});
-    setUpdateError('');
+    setUpdateError("");
     setIsUpdating(false);
   };
-  
+
   const saveEdit = async (id: string) => {
     // Clear previous errors
-    setUpdateError('');
-    
+    setUpdateError("");
+
     // Validate edit form
     if (!validateEditForm()) {
       return;
     }
-    
+
     try {
       setIsUpdating(true);
-      
+
       const updateData: Partial<Expense> = {
         name: editFormData.name!.trim(),
         amount: editFormData.amount!,
         category: editFormData.category!.trim(),
         date: editFormData.date!,
         status: editFormData.status!,
-        notes: editFormData.notes?.trim() || '',
+        notes: editFormData.notes?.trim() || "",
         billing_type: editFormData.billing_type!,
-        billing_day: editFormData.billing_type === 'unique' ? undefined : editFormData.billing_day,
-        billing_month: editFormData.billing_type === 'yearly' ? editFormData.billing_month : undefined,
+        billing_day:
+          editFormData.billing_type === "unique"
+            ? undefined
+            : editFormData.billing_day,
+        billing_month:
+          editFormData.billing_type === "yearly"
+            ? editFormData.billing_month
+            : undefined,
       };
-      
+
       await updateExpense(id, updateData);
-      
+
       // Reset edit state on success
       setEditingExpenseId(null);
       setEditFormData({});
-      setUpdateError('');
-      
+      setUpdateError("");
     } catch (error) {
-      console.error('Error updating expense:', error);
-      setUpdateError('Erro ao atualizar despesa. Tente novamente.');
+      console.error("Error updating expense:", error);
+      setUpdateError("Erro ao atualizar despesa. Tente novamente.");
     } finally {
       setIsUpdating(false);
     }
   };
-  
+
   const handleDeleteClick = (expense: Expense) => {
     setConfirmModal({
       isOpen: true,
       expenseId: expense.id,
-      expenseName: `${expense.name} - R$ ${expense.amount.toLocaleString('pt-BR')}`
+      expenseName: `${expense.name} - R$ ${expense.amount.toLocaleString(
+        "pt-BR"
+      )}`,
     });
   };
-  
+
   const handleConfirmDelete = async () => {
     if (confirmModal.expenseId) {
       try {
         await removeExpense(confirmModal.expenseId);
       } catch (error) {
-        console.error('Error deleting expense:', error);
+        console.error("Error deleting expense:", error);
       }
     }
   };
-  
+
   const handleCloseModal = () => {
     setConfirmModal({
       isOpen: false,
-      expenseId: '',
-      expenseName: ''
+      expenseId: "",
+      expenseName: "",
     });
   };
-  
+
   const toggleStatus = async (expense: Expense) => {
     try {
-      const newStatus = expense.status === 'paid' ? 'pending' : 'paid';
+      const newStatus = expense.status === "paid" ? "pending" : "paid";
       await updateExpense(expense.id, { status: newStatus });
     } catch (error) {
-      console.error('Error updating expense status:', error);
+      console.error("Error updating expense status:", error);
     }
   };
-  
+
   // Filter expenses based on current filters
   const filteredExpenses = expenses.filter((expense) => {
     // Filter by category
     if (filters.category && expense.category !== filters.category) {
       return false;
     }
-    
+
     // Filter by status
-    if (filters.status !== 'all' && expense.status !== filters.status) {
+    if (filters.status !== "all" && expense.status !== filters.status) {
       return false;
     }
-    
+
     // Filter by billing type
-    if (filters.billing_type !== 'all' && expense.billing_type !== filters.billing_type) {
+    if (
+      filters.billing_type !== "all" &&
+      expense.billing_type !== filters.billing_type
+    ) {
       return false;
     }
-    
+
     // Filter by date range
-    if (filters.dateFrom && new Date(expense.date) < new Date(filters.dateFrom)) {
+    if (
+      filters.dateFrom &&
+      new Date(expense.date) < new Date(filters.dateFrom)
+    ) {
       return false;
     }
-    
+
     if (filters.dateTo && new Date(expense.date) > new Date(filters.dateTo)) {
       return false;
     }
-    
+
     return true;
   });
-  
+
   // Sort expenses by date (newest first)
   const sortedExpenses = [...filteredExpenses].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
-  
+
   // Get unique categories for filter dropdown
-  const allCategories = Array.from(new Set(expenses.map(e => e.category)));
-  
+  const allCategories = Array.from(new Set(expenses.map((e) => e.category)));
+
   // Get current month expenses
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthlyTotal = getMonthlyExpenses(currentMonth);
-  
+
   // Get category icon
   const getCategoryIcon = (categoryName: string) => {
-    const category = expenseCategories.find(cat => cat.name === categoryName);
+    const category = expenseCategories.find((cat) => cat.name === categoryName);
     return category ? category.icon : MoreHorizontal;
   };
-  
+
   // Get billing type icon and label
   const getBillingInfo = (expense: Expense) => {
     switch (expense.billing_type) {
-      case 'monthly':
+      case "monthly":
         return {
           icon: RefreshCw,
           label: `Mensal - Dia ${expense.billing_day}`,
-          color: 'text-blue-600 bg-blue-100'
+          color: "text-blue-600 bg-blue-100",
         };
-      case 'yearly':
+      case "yearly":
         return {
           icon: CalendarDays,
           label: `Anual - ${expense.billing_day}/${expense.billing_month}`,
-          color: 'text-purple-600 bg-purple-100'
+          color: "text-purple-600 bg-purple-100",
         };
       default:
         return {
           icon: Calendar,
-          label: 'Única',
-          color: 'text-gray-600 bg-gray-100'
+          label: "Única",
+          color: "text-gray-600 bg-gray-100",
         };
     }
   };
-  
+
   // Calculate totals
   const totalPaid = filteredExpenses
-    .filter(e => e.status === 'paid')
+    .filter((e) => e.status === "paid")
     .reduce((sum, e) => sum + e.amount, 0);
-  
+
   const totalPending = filteredExpenses
-    .filter(e => e.status === 'pending')
+    .filter((e) => e.status === "pending")
     .reduce((sum, e) => sum + e.amount, 0);
 
   // Options for selects
   const statusOptions = [
-    { value: 'pending', label: 'Pendente' },
-    { value: 'paid', label: 'Pago' }
+    { value: "pending", label: "Pendente" },
+    { value: "paid", label: "Pago" },
   ];
 
   const billingTypeOptions = [
-    { value: 'unique', label: 'Cobrança Única' },
-    { value: 'monthly', label: 'Cobrança Mensal' },
-    { value: 'yearly', label: 'Cobrança Anual' }
+    { value: "unique", label: "Cobrança Única" },
+    { value: "monthly", label: "Cobrança Mensal" },
+    { value: "yearly", label: "Cobrança Anual" },
   ];
 
   const filterStatusOptions = [
-    { value: 'all', label: 'Todos' },
-    { value: 'paid', label: 'Pagos' },
-    { value: 'pending', label: 'Pendentes' }
+    { value: "all", label: "Todos" },
+    { value: "paid", label: "Pagos" },
+    { value: "pending", label: "Pendentes" },
   ];
 
   const filterBillingTypeOptions = [
-    { value: 'all', label: 'Todos os tipos' },
-    { value: 'unique', label: 'Únicas' },
-    { value: 'monthly', label: 'Mensais' },
-    { value: 'yearly', label: 'Anuais' }
+    { value: "all", label: "Todos os tipos" },
+    { value: "unique", label: "Únicas" },
+    { value: "monthly", label: "Mensais" },
+    { value: "yearly", label: "Anuais" },
   ];
 
   const filterCategoryOptions = [
-    { value: '', label: 'Todas' },
-    ...allCategories.map(category => ({ value: category, label: category }))
+    { value: "", label: "Todas" },
+    ...allCategories.map((category) => ({ value: category, label: category })),
   ];
 
   // Generate month options (1-12)
   const monthOptions = Array.from({ length: 12 }, (_, i) => ({
     value: (i + 1).toString(),
-    label: new Date(2024, i, 1).toLocaleDateString('pt-BR', { month: 'long' })
+    label: new Date(2024, i, 1).toLocaleDateString("pt-BR", { month: "long" }),
   }));
 
   // Generate day options (1-31)
   const dayOptions = Array.from({ length: 31 }, (_, i) => ({
     value: (i + 1).toString(),
-    label: (i + 1).toString()
+    label: (i + 1).toString(),
   }));
 
   return (
@@ -544,15 +599,25 @@ const Expenses: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="page-title">Despesas</h1>
         <div className="flex flex-col sm:flex-row gap-2">
-          <button 
+          <button
             onClick={() => setShowFilters(!showFilters)}
             className="btn btn-outline w-full sm:w-auto"
           >
             <Filter className="h-5 w-5 mr-2" />
             Filtros
           </button>
-          <button 
-            onClick={() => setShowForm(true)}
+          <button
+            onClick={() => {
+              setShowForm(true);
+              setTimeout(() => {
+                if (formRef.current) {
+                  formRef.current.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              }, 100);
+            }}
             className="btn btn-primary w-full sm:w-auto"
           >
             <PlusCircle className="h-5 w-5 mr-2" />
@@ -560,7 +625,7 @@ const Expenses: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Monthly Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card p-4">
@@ -570,12 +635,17 @@ const Expenses: React.FC = () => {
             </div>
             <h3 className="ml-3 text-lg font-semibold">Total do Mês</h3>
           </div>
-          <p className="text-2xl font-bold text-red-600">R$ {monthlyTotal.toLocaleString('pt-BR')}</p>
+          <p className="text-2xl font-bold text-red-600">
+            R$ {monthlyTotal.toLocaleString("pt-BR")}
+          </p>
           <p className="text-sm text-gray-500 mt-1">
-            {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+            {new Date().toLocaleDateString("pt-BR", {
+              month: "long",
+              year: "numeric",
+            })}
           </p>
         </div>
-        
+
         <div className="card p-4">
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
@@ -583,12 +653,15 @@ const Expenses: React.FC = () => {
             </div>
             <h3 className="ml-3 text-lg font-semibold">Pagas</h3>
           </div>
-          <p className="text-2xl font-bold text-green-600">R$ {totalPaid.toLocaleString('pt-BR')}</p>
+          <p className="text-2xl font-bold text-green-600">
+            R$ {totalPaid.toLocaleString("pt-BR")}
+          </p>
           <p className="text-sm text-gray-500 mt-1">
-            {filteredExpenses.filter(e => e.status === 'paid').length} despesas
+            {filteredExpenses.filter((e) => e.status === "paid").length}{" "}
+            despesas
           </p>
         </div>
-        
+
         <div className="card p-4">
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
@@ -596,13 +669,16 @@ const Expenses: React.FC = () => {
             </div>
             <h3 className="ml-3 text-lg font-semibold">Pendentes</h3>
           </div>
-          <p className="text-2xl font-bold text-orange-600">R$ {totalPending.toLocaleString('pt-BR')}</p>
+          <p className="text-2xl font-bold text-orange-600">
+            R$ {totalPending.toLocaleString("pt-BR")}
+          </p>
           <p className="text-sm text-gray-500 mt-1">
-            {filteredExpenses.filter(e => e.status === 'pending').length} despesas
+            {filteredExpenses.filter((e) => e.status === "pending").length}{" "}
+            despesas
           </p>
         </div>
       </div>
-      
+
       {/* Filters */}
       {showFilters && (
         <div className="card p-4">
@@ -614,35 +690,42 @@ const Expenses: React.FC = () => {
               </label>
               <CustomSelect
                 value={filters.category}
-                onChange={(value) => handleFilterSelectChange('category', value)}
+                onChange={(value) =>
+                  handleFilterSelectChange("category", value)
+                }
                 options={filterCategoryOptions}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status
               </label>
               <CustomSelect
                 value={filters.status}
-                onChange={(value) => handleFilterSelectChange('status', value)}
+                onChange={(value) => handleFilterSelectChange("status", value)}
                 options={filterStatusOptions}
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tipo de Cobrança
               </label>
               <CustomSelect
                 value={filters.billing_type}
-                onChange={(value) => handleFilterSelectChange('billing_type', value)}
+                onChange={(value) =>
+                  handleFilterSelectChange("billing_type", value)
+                }
                 options={filterBillingTypeOptions}
               />
             </div>
-            
+
             <div>
-              <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="dateFrom"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Data Inicial
               </label>
               <input
@@ -654,9 +737,12 @@ const Expenses: React.FC = () => {
                 className="input-field"
               />
             </div>
-            
+
             <div>
-              <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="dateTo"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Data Final
               </label>
               <input
@@ -671,23 +757,26 @@ const Expenses: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Add Form */}
       {showForm && (
-        <div className="card p-4">
+        <div className="card p-4" ref={formRef}>
           <h2 className="form-title">Nova Despesa</h2>
-          
+
           {/* Error message */}
           {submitError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-700 text-sm">{submitError}</p>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Nome da Despesa *
                 </label>
                 <input
@@ -702,9 +791,12 @@ const Expenses: React.FC = () => {
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="amount"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Valor (R$) *
                 </label>
                 <input
@@ -721,16 +813,19 @@ const Expenses: React.FC = () => {
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Categoria *
                 </label>
                 {!showCustomCategory ? (
                   <CategorySelector
                     value={formData.category}
                     onChange={handleCategoryChange}
-                    categories={expenseCategories.map(cat => cat.name)}
+                    categories={expenseCategories.map((cat) => cat.name)}
                     placeholder="Selecione uma categoria"
                     onCustomCategory={handleCustomCategoryClick}
                     showCustomOption={true}
@@ -747,21 +842,24 @@ const Expenses: React.FC = () => {
                   />
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
                 </label>
                 <CustomSelect
                   value={formData.status}
-                  onChange={(value) => handleSelectChange('status', value)}
+                  onChange={(value) => handleSelectChange("status", value)}
                   options={statusOptions}
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Data *
                 </label>
                 <input
@@ -775,53 +873,63 @@ const Expenses: React.FC = () => {
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tipo de Cobrança *
                 </label>
                 <CustomSelect
                   value={formData.billing_type}
-                  onChange={(value) => handleSelectChange('billing_type', value)}
+                  onChange={(value) =>
+                    handleSelectChange("billing_type", value)
+                  }
                   options={billingTypeOptions}
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               {/* Billing Day - for monthly and yearly */}
-              {(formData.billing_type === 'monthly' || formData.billing_type === 'yearly') && (
+              {(formData.billing_type === "monthly" ||
+                formData.billing_type === "yearly") && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Dia da Cobrança *
                   </label>
                   <CustomSelect
                     value={formData.billing_day}
-                    onChange={(value) => handleSelectChange('billing_day', value)}
+                    onChange={(value) =>
+                      handleSelectChange("billing_day", value)
+                    }
                     options={dayOptions}
                     placeholder="Selecione o dia"
                     disabled={isSubmitting}
                   />
                 </div>
               )}
-              
+
               {/* Billing Month - only for yearly */}
-              {formData.billing_type === 'yearly' && (
+              {formData.billing_type === "yearly" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Mês da Cobrança *
                   </label>
                   <CustomSelect
                     value={formData.billing_month}
-                    onChange={(value) => handleSelectChange('billing_month', value)}
+                    onChange={(value) =>
+                      handleSelectChange("billing_month", value)
+                    }
                     options={monthOptions}
                     placeholder="Selecione o mês"
                     disabled={isSubmitting}
                   />
                 </div>
               )}
-              
+
               <div className="md:col-span-2">
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="notes"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Observações
                 </label>
                 <textarea
@@ -835,15 +943,15 @@ const Expenses: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row justify-end gap-2">
               <button
                 type="button"
                 onClick={() => {
                   setShowForm(false);
                   setShowCustomCategory(false);
-                  setCustomCategory('');
-                  setSubmitError('');
+                  setCustomCategory("");
+                  setSubmitError("");
                 }}
                 className="btn btn-outline w-full sm:w-auto"
                 disabled={isSubmitting}
@@ -861,14 +969,14 @@ const Expenses: React.FC = () => {
                     Salvando...
                   </div>
                 ) : (
-                  'Salvar'
+                  "Salvar"
                 )}
               </button>
             </div>
           </form>
         </div>
       )}
-      
+
       {/* Expenses List */}
       <div className="space-y-4">
         {sortedExpenses.length > 0 ? (
@@ -877,7 +985,7 @@ const Expenses: React.FC = () => {
             const CategoryIcon = getCategoryIcon(expense.category);
             const billingInfo = getBillingInfo(expense);
             const BillingIcon = billingInfo.icon;
-            
+
             return (
               <div key={expense.id} className="card overflow-hidden">
                 {/* Main expense row - Fixed layout to prevent icon overlap */}
@@ -888,44 +996,52 @@ const Expenses: React.FC = () => {
                       <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                         <CategoryIcon className="h-5 w-5 text-gray-600" />
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-800 truncate">{expense.name}</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 truncate">
+                          {expense.name}
+                        </h3>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className="text-sm text-gray-500">{expense.category}</span>
+                          <span className="text-sm text-gray-500">
+                            {expense.category}
+                          </span>
                           <span className="text-sm text-gray-500">•</span>
                           <span className="text-sm text-gray-500">
-                            {expense.date.split('-').reverse().join('/')}
+                            {expense.date.split("-").reverse().join("/")}
                           </span>
                           {/* Billing type badge */}
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${billingInfo.color}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${billingInfo.color}`}
+                          >
                             <BillingIcon className="h-3 w-3 mr-1" />
                             {billingInfo.label}
                           </span>
                         </div>
-                        
+
                         {expense.notes && !isEditing && (
-                          <p className="text-sm text-gray-600 mt-2 italic">"{expense.notes}"</p>
+                          <p className="text-sm text-gray-600 mt-2 italic">
+                            "{expense.notes}"
+                          </p>
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Right section with amount, status and actions */}
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 sm:ml-4">
                       {/* Amount and status */}
                       <div className="text-center sm:text-right">
                         <p className="text-xl font-bold text-red-600">
-                          R$ {expense.amount.toLocaleString('pt-BR')}
+                          R$ {expense.amount.toLocaleString("pt-BR")}
                         </p>
                         <button
                           onClick={() => toggleStatus(expense)}
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
-                            expense.status === 'paid'
-                              ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                              : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                            expense.status === "paid"
+                              ? "bg-green-100 text-green-800 hover:bg-green-200"
+                              : "bg-orange-100 text-orange-800 hover:bg-orange-200"
                           }`}
                         >
-                          {expense.status === 'paid' ? (
+                          {expense.status === "paid" ? (
                             <>
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Pago
@@ -938,7 +1054,7 @@ const Expenses: React.FC = () => {
                           )}
                         </button>
                       </div>
-                      
+
                       {/* Action buttons */}
                       <div className="flex items-center justify-center space-x-2">
                         <button
@@ -959,22 +1075,24 @@ const Expenses: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Expanded edit form */}
                 {isEditing && (
                   <div className="bg-gray-50 border-t p-4">
                     <div className="flex items-center mb-4">
                       <Edit3 className="h-5 w-5 text-blue-600 mr-2" />
-                      <h4 className="font-medium text-gray-800">Editando Despesa</h4>
+                      <h4 className="font-medium text-gray-800">
+                        Editando Despesa
+                      </h4>
                     </div>
-                    
+
                     {/* Error message for edit form */}
                     {updateError && (
                       <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-red-700 text-sm">{updateError}</p>
                       </div>
                     )}
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -983,14 +1101,14 @@ const Expenses: React.FC = () => {
                         <input
                           type="text"
                           name="name"
-                          value={editFormData.name || ''}
+                          value={editFormData.name || ""}
                           onChange={handleEditChange}
                           className="input-field"
                           placeholder="Nome da despesa"
                           disabled={isUpdating}
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Valor (R$) *
@@ -1000,39 +1118,41 @@ const Expenses: React.FC = () => {
                           step="0.01"
                           min="0.01"
                           name="amount"
-                          value={editFormData.amount || ''}
+                          value={editFormData.amount || ""}
                           onChange={handleEditChange}
                           className="input-field"
                           placeholder="0,00"
                           disabled={isUpdating}
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Categoria *
                         </label>
                         <CategorySelector
-                          value={editFormData.category || ''}
+                          value={editFormData.category || ""}
                           onChange={handleEditCategoryChange}
-                          categories={expenseCategories.map(cat => cat.name)}
+                          categories={expenseCategories.map((cat) => cat.name)}
                           placeholder="Selecione uma categoria"
                           showCustomOption={false}
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Status
                         </label>
                         <CustomSelect
                           value={editFormData.status || expense.status}
-                          onChange={(value) => handleEditSelectChange('status', value)}
+                          onChange={(value) =>
+                            handleEditSelectChange("status", value)
+                          }
                           options={statusOptions}
                           disabled={isUpdating}
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Data *
@@ -1040,64 +1160,73 @@ const Expenses: React.FC = () => {
                         <input
                           type="date"
                           name="date"
-                          value={editFormData.date || ''}
+                          value={editFormData.date || ""}
                           onChange={handleEditChange}
                           className="input-field"
                           disabled={isUpdating}
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Tipo de Cobrança *
                         </label>
                         <CustomSelect
-                          value={editFormData.billing_type || expense.billing_type}
-                          onChange={(value) => handleEditSelectChange('billing_type', value)}
+                          value={
+                            editFormData.billing_type || expense.billing_type
+                          }
+                          onChange={(value) =>
+                            handleEditSelectChange("billing_type", value)
+                          }
                           options={billingTypeOptions}
                           disabled={isUpdating}
                         />
                       </div>
-                      
+
                       {/* Billing Day - for monthly and yearly */}
-                      {(editFormData.billing_type === 'monthly' || editFormData.billing_type === 'yearly') && (
+                      {(editFormData.billing_type === "monthly" ||
+                        editFormData.billing_type === "yearly") && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Dia da Cobrança *
                           </label>
                           <CustomSelect
-                            value={editFormData.billing_day?.toString() || ''}
-                            onChange={(value) => handleEditSelectChange('billing_day', value)}
+                            value={editFormData.billing_day?.toString() || ""}
+                            onChange={(value) =>
+                              handleEditSelectChange("billing_day", value)
+                            }
                             options={dayOptions}
                             placeholder="Selecione o dia"
                             disabled={isUpdating}
                           />
                         </div>
                       )}
-                      
+
                       {/* Billing Month - only for yearly */}
-                      {editFormData.billing_type === 'yearly' && (
+                      {editFormData.billing_type === "yearly" && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Mês da Cobrança *
                           </label>
                           <CustomSelect
-                            value={editFormData.billing_month?.toString() || ''}
-                            onChange={(value) => handleEditSelectChange('billing_month', value)}
+                            value={editFormData.billing_month?.toString() || ""}
+                            onChange={(value) =>
+                              handleEditSelectChange("billing_month", value)
+                            }
                             options={monthOptions}
                             placeholder="Selecione o mês"
                             disabled={isUpdating}
                           />
                         </div>
                       )}
-                      
+
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Observações
                         </label>
                         <textarea
                           name="notes"
-                          value={editFormData.notes || ''}
+                          value={editFormData.notes || ""}
                           onChange={handleEditChange}
                           className="input-field h-20"
                           placeholder="Observações sobre esta despesa..."
@@ -1105,7 +1234,7 @@ const Expenses: React.FC = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-end space-x-3 mt-6">
                       <button
                         onClick={cancelEditing}
@@ -1141,11 +1270,14 @@ const Expenses: React.FC = () => {
         ) : (
           <div className="card p-8 text-center">
             <TrendingDown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-800 mb-2">Nenhuma despesa encontrada</h3>
+            <h3 className="text-lg font-medium text-gray-800 mb-2">
+              Nenhuma despesa encontrada
+            </h3>
             <p className="text-gray-600 mb-4">
-              Comece adicionando suas primeiras despesas para ter controle total dos seus gastos.
+              Comece adicionando suas primeiras despesas para ter controle total
+              dos seus gastos.
             </p>
-            <button 
+            <button
               onClick={() => setShowForm(true)}
               className="btn btn-primary"
             >
@@ -1155,7 +1287,7 @@ const Expenses: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmModal.isOpen}
@@ -1168,17 +1300,20 @@ const Expenses: React.FC = () => {
         type="danger"
         itemName={confirmModal.expenseName}
       />
-      
+
       {/* Scripture inspiration */}
       <div className="card p-4">
         <h2 className="section-title">Reflexão Bíblica</h2>
         <p className="text-gray-700 mb-4">
-          Controlar nossas despesas é um ato de mordomia responsável. Quando sabemos exatamente onde nosso dinheiro está sendo gasto,
-          podemos tomar decisões mais sábias e alinhar nossos gastos com nossos valores cristãos. O sistema de cobrança nos ajuda
-          a planejar e antecipar nossos compromissos financeiros.
+          Controlar nossas despesas é um ato de mordomia responsável. Quando
+          sabemos exatamente onde nosso dinheiro está sendo gasto, podemos tomar
+          decisões mais sábias e alinhar nossos gastos com nossos valores
+          cristãos. O sistema de cobrança nos ajuda a planejar e antecipar
+          nossos compromissos financeiros.
         </p>
         <div className="scripture">
-          "Porque onde estiver o vosso tesouro, aí estará também o vosso coração." (Mateus 6:21)
+          "Porque onde estiver o vosso tesouro, aí estará também o vosso
+          coração." (Mateus 6:21)
         </div>
       </div>
     </div>
