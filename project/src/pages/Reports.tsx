@@ -28,7 +28,12 @@ import CustomSelect from "../components/CustomSelect";
 import { generatePDFReport } from "../utils/pdfGenerator";
 
 const Reports: React.FC = () => {
-  const { transactions, tithingRecords, goals, expenses } = useFinance();
+  const { transactions, tithingRecords, goals, expenses, loadUserData } =
+    useFinance();
+  // Load finance data on mount
+  React.useEffect(() => {
+    loadUserData();
+  }, [loadUserData]);
 
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const today = new Date();

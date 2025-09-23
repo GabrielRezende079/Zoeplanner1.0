@@ -43,18 +43,20 @@ const Dashboard: React.FC = () => {
     getMonthlyExpenses,
     goals,
     tithingRecords,
+    loadUserData,
   } = useFinance();
   const { banks, loadBanksData, isDataLoaded: isBanksDataLoaded } = useBanks();
 
   // Month filter state
   const [monthsToShow, setMonthsToShow] = useState(6);
 
-  // Load banks data if not loaded
+  // Load banks and finance data on mount
   React.useEffect(() => {
+    loadUserData();
     if (!isBanksDataLoaded) {
       loadBanksData();
     }
-  }, [isBanksDataLoaded, loadBanksData]);
+  }, [isBanksDataLoaded, loadBanksData, loadUserData]);
 
   // Get current month for filtering
   const currentMonth = new Date().toISOString().slice(0, 7);

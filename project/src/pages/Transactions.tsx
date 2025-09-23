@@ -12,8 +12,13 @@ import CustomSelect from "../components/CustomSelect";
 import ConfirmationModal from "../components/ConfirmationModal";
 
 const Transactions: React.FC = () => {
-  const { transactions, addTransaction, removeTransaction, updateTransaction } =
-    useFinance();
+  const {
+    transactions,
+    addTransaction,
+    removeTransaction,
+    updateTransaction,
+    loadUserData,
+  } = useFinance();
   const { banks, loadBanksData, isDataLoaded: isBanksDataLoaded } = useBanks();
 
   // Predefined categories
@@ -80,12 +85,13 @@ const Transactions: React.FC = () => {
     null
   );
 
-  // Load banks data on mount
+  // Load banks and finance data on mount
   React.useEffect(() => {
+    loadUserData();
     if (!isBanksDataLoaded) {
       loadBanksData();
     }
-  }, [isBanksDataLoaded, loadBanksData]);
+  }, [isBanksDataLoaded, loadBanksData, loadUserData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

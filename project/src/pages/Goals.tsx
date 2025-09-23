@@ -20,8 +20,18 @@ import CustomSelect from "../components/CustomSelect";
 import ConfirmationModal from "../components/ConfirmationModal";
 
 const Goals: React.FC = () => {
-  const { goals, addGoal, updateGoalProgress, removeGoal, updateGoal } =
-    useFinance();
+  const {
+    goals,
+    addGoal,
+    updateGoalProgress,
+    removeGoal,
+    updateGoal,
+    loadUserData,
+  } = useFinance();
+  // Load finance data on mount
+  React.useEffect(() => {
+    loadUserData();
+  }, [loadUserData]);
 
   // Form state
   const [showForm, setShowForm] = useState(false);

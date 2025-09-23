@@ -37,7 +37,12 @@ const Expenses: React.FC = () => {
     updateExpense,
     removeExpense,
     getMonthlyExpenses,
+    loadUserData,
   } = useFinance();
+  // Load finance data on mount
+  React.useEffect(() => {
+    loadUserData();
+  }, [loadUserData]);
 
   // Predefined categories with icons
   const expenseCategories = [
