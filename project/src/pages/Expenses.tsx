@@ -590,7 +590,9 @@ const Expenses: React.FC = () => {
     <div className="space-y-8">
       {/* Gradient Header */}
       <div className="rounded-2xl border-2 border-gold-200 shadow-xl bg-gradient-to-br from-gold-50 via-white to-olive-50 px-6 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-bold text-olive-900 tracking-tight drop-shadow-lg">Despesas</h1>
+        <h1 className="text-3xl font-bold text-olive-900 tracking-tight drop-shadow-lg">
+          Despesas
+        </h1>
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -626,7 +628,9 @@ const Expenses: React.FC = () => {
             <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
               <TrendingDown className="h-5 w-5 text-red-600" />
             </div>
-            <h3 className="ml-3 text-lg font-semibold text-red-800">Total do Mês</h3>
+            <h3 className="ml-3 text-lg font-semibold text-red-800">
+              Total do Mês
+            </h3>
           </div>
           <p className="text-2xl font-bold text-red-600">
             R$ {monthlyTotal.toLocaleString("pt-BR")}
@@ -650,7 +654,8 @@ const Expenses: React.FC = () => {
             R$ {totalPaid.toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            {filteredExpenses.filter((e) => e.status === "paid").length} despesas
+            {filteredExpenses.filter((e) => e.status === "paid").length}{" "}
+            despesas
           </p>
         </div>
 
@@ -659,13 +664,16 @@ const Expenses: React.FC = () => {
             <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
               <Clock className="h-5 w-5 text-orange-600" />
             </div>
-            <h3 className="ml-3 text-lg font-semibold text-orange-800">Pendentes</h3>
+            <h3 className="ml-3 text-lg font-semibold text-orange-800">
+              Pendentes
+            </h3>
           </div>
           <p className="text-2xl font-bold text-orange-600">
             R$ {totalPending.toLocaleString("pt-BR")}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            {filteredExpenses.filter((e) => e.status === "pending").length} despesas
+            {filteredExpenses.filter((e) => e.status === "pending").length}{" "}
+            despesas
           </p>
         </div>
       </div>
@@ -813,14 +821,79 @@ const Expenses: React.FC = () => {
                   Categoria *
                 </label>
                 {!showCustomCategory ? (
-                  <CategorySelector
-                    value={formData.category}
-                    onChange={handleCategoryChange}
-                    categories={expenseCategories.map((cat) => cat.name)}
-                    placeholder="Selecione uma categoria"
-                    onCustomCategory={handleCustomCategoryClick}
-                    showCustomOption={true}
-                  />
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-2">
+                      {expenseCategories.map((cat) => {
+                        // Cores de fundo por categoria (padrão sutil, mas distintas)
+                        const categoryBg: Record<string, string> = {
+                          Alimentação:
+                            "bg-orange-50 hover:bg-orange-100 border-orange-200",
+                          Moradia:
+                            "bg-blue-50 hover:bg-blue-100 border-blue-200",
+                          Transporte:
+                            "bg-emerald-50 hover:bg-emerald-100 border-emerald-200",
+                          Saúde: "bg-pink-50 hover:bg-pink-100 border-pink-200",
+                          Educação:
+                            "bg-indigo-50 hover:bg-indigo-100 border-indigo-200",
+                          Lazer:
+                            "bg-yellow-50 hover:bg-yellow-100 border-yellow-200",
+                          Vestuário:
+                            "bg-purple-50 hover:bg-purple-100 border-purple-200",
+                          Supermercado:
+                            "bg-teal-50 hover:bg-teal-100 border-teal-200",
+                          Combustível:
+                            "bg-lime-50 hover:bg-lime-100 border-lime-200",
+                          Presentes:
+                            "bg-fuchsia-50 hover:bg-fuchsia-100 border-fuchsia-200",
+                          Doações:
+                            "bg-amber-50 hover:bg-amber-100 border-amber-200",
+                          Outros:
+                            "bg-gray-50 hover:bg-gray-100 border-gray-200",
+                        };
+                        const selected = formData.category === cat.name;
+                        const Icon = cat.icon;
+                        return (
+                          <button
+                            type="button"
+                            key={cat.name}
+                            className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-all duration-150
+                              focus:outline-none focus:ring-2 focus:ring-gold-400
+                              active:scale-95
+                              ${
+                                categoryBg[cat.name] ||
+                                "bg-gray-50 hover:bg-gold-50 border-gray-200"
+                              }
+                              ${
+                                selected
+                                  ? "ring-2 ring-gold-400 border-gold-400 shadow-md scale-105"
+                                  : ""
+                              }
+                            `}
+                            style={{
+                              transition:
+                                "transform 0.12s cubic-bezier(.4,0,.2,1), box-shadow 0.12s cubic-bezier(.4,0,.2,1)",
+                            }}
+                            onClick={() => handleCategoryChange(cat.name)}
+                            aria-pressed={selected}
+                            disabled={isSubmitting}
+                          >
+                            <span className="text-lg">
+                              <Icon className="h-5 w-5" />
+                            </span>
+                            <span>{cat.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs text-blue-600 hover:underline mt-1"
+                      onClick={handleCustomCategoryClick}
+                      disabled={isSubmitting}
+                    >
+                      Não encontrou? Adicionar categoria personalizada
+                    </button>
+                  </>
                 ) : (
                   <input
                     type="text"
@@ -866,17 +939,60 @@ const Expenses: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 text-right w-60 pr-2">
                   Tipo de Cobrança *
                 </label>
-                <CustomSelect
-                  value={formData.billing_type}
-                  onChange={(value) =>
-                    handleSelectChange("billing_type", value)
-                  }
-                  options={billingTypeOptions}
-                  disabled={isSubmitting}
-                />
+                <div className="flex flex-row gap-7 mb-2 justify-center items-center">
+                  {billingTypeOptions.map((opt) => {
+                    const selected = formData.billing_type === opt.value;
+                    // Ícones para cada tipo
+                    const iconMap: Record<string, React.ReactNode> = {
+                      unique: <Calendar className="h-4 w-4" />,
+                      monthly: <RefreshCw className="h-4 w-4" />,
+                      yearly: <CalendarDays className="h-4 w-4" />,
+                    };
+                    // Cores de fundo
+                    const bgMap: Record<string, string> = {
+                      unique: "bg-gray-50 hover:bg-gold-50 border-gray-200",
+                      monthly: "bg-blue-50 hover:bg-blue-100 border-blue-200",
+                      yearly:
+                        "bg-purple-50 hover:bg-purple-100 border-purple-200",
+                    };
+                    return (
+                      <button
+                        type="button"
+                        key={opt.value}
+                        className={`flex flex-col items-center justify-center rounded-md border px-1.5 py-1 text-xs font-medium transition-all duration-150 min-w-[70px] max-w-[90px]
+                          focus:outline-none focus:ring-2 focus:ring-gold-400
+                          active:scale-95
+                          ${
+                            bgMap[opt.value] ||
+                            "bg-gray-50 hover:bg-gold-50 border-gray-200"
+                          }
+                          ${
+                            selected
+                              ? "ring-2 ring-gold-400 border-gold-400 shadow-md scale-105"
+                              : ""
+                          }
+                        `}
+                        style={{
+                          transition:
+                            "transform 0.12s cubic-bezier(.4,0,.2,1), box-shadow 0.12s cubic-bezier(.4,0,.2,1)",
+                        }}
+                        onClick={() =>
+                          handleSelectChange("billing_type", opt.value)
+                        }
+                        aria-pressed={selected}
+                        disabled={isSubmitting}
+                      >
+                        <span className="mb-0.5">{iconMap[opt.value]}</span>
+                        <span className="leading-tight text-[11px] text-center">
+                          {opt.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Billing Day - for monthly and yearly */}
