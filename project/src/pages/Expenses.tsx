@@ -595,13 +595,6 @@ const Expenses: React.FC = () => {
         </h1>
         <div className="flex flex-col sm:flex-row gap-2">
           <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="btn btn-outline w-full sm:w-auto border-gold-300 text-olive-900 hover:bg-gold-50"
-          >
-            <Filter className="h-5 w-5 mr-2" />
-            Filtros
-          </button>
-          <button
             onClick={() => {
               setShowForm(true);
               setTimeout(() => {
@@ -623,7 +616,46 @@ const Expenses: React.FC = () => {
 
       {/* Monthly Summary - Enhanced Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="rounded-2xl border-2 border-red-200 shadow-lg bg-gradient-to-br from-red-50 via-white to-gold-50 p-6">
+        {/* Total do Mês (não é botão) */}
+        <button
+          type="button"
+          onClick={() => {
+            const monthStart = `${currentMonth}-01`;
+            const monthEnd = `${currentMonth}-${String(
+              new Date(
+                new Date().getFullYear(),
+                new Date().getMonth() + 1,
+                0
+              ).getDate()
+            ).padStart(2, "0")}`;
+            if (
+              filters.dateFrom === monthStart &&
+              filters.dateTo === monthEnd
+            ) {
+              setFilters((prev) => ({ ...prev, dateFrom: "", dateTo: "" }));
+            } else {
+              setFilters((prev) => ({
+                ...prev,
+                dateFrom: monthStart,
+                dateTo: monthEnd,
+                status: "all",
+              }));
+            }
+          }}
+          className={`rounded-2xl border-2 border-red-200 shadow-lg bg-gradient-to-br from-red-50 via-white to-gold-50 p-6 text-left transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-300 ${
+            filters.dateFrom === `${currentMonth}-01` &&
+            filters.dateTo ===
+              `${currentMonth}-${String(
+                new Date(
+                  new Date().getFullYear(),
+                  new Date().getMonth() + 1,
+                  0
+                ).getDate()
+              ).padStart(2, "0")}`
+              ? "ring-2 ring-red-400 border-red-400"
+              : ""
+          }`}
+        >
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
               <TrendingDown className="h-5 w-5 text-red-600" />
@@ -641,9 +673,23 @@ const Expenses: React.FC = () => {
               year: "numeric",
             })}
           </p>
-        </div>
+        </button>
 
-        <div className="rounded-2xl border-2 border-green-200 shadow-lg bg-gradient-to-br from-green-50 via-white to-gold-50 p-6">
+        {/* Card Pagas - botão de filtro */}
+        <button
+          type="button"
+          onClick={() =>
+            setFilters((prev) => ({
+              ...prev,
+              status: prev.status === "paid" ? "all" : "paid",
+            }))
+          }
+          className={`rounded-2xl border-2 border-green-200 shadow-lg bg-gradient-to-br from-green-50 via-white to-gold-50 p-6 text-left transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-300 ${
+            filters.status === "paid"
+              ? "ring-2 ring-green-400 border-green-400"
+              : ""
+          }`}
+        >
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -657,9 +703,23 @@ const Expenses: React.FC = () => {
             {filteredExpenses.filter((e) => e.status === "paid").length}{" "}
             despesas
           </p>
-        </div>
+        </button>
 
-        <div className="rounded-2xl border-2 border-orange-200 shadow-lg bg-gradient-to-br from-orange-50 via-white to-gold-50 p-6">
+        {/* Card Pendentes - botão de filtro */}
+        <button
+          type="button"
+          onClick={() =>
+            setFilters((prev) => ({
+              ...prev,
+              status: prev.status === "pending" ? "all" : "pending",
+            }))
+          }
+          className={`rounded-2xl border-2 border-orange-200 shadow-lg bg-gradient-to-br from-orange-50 via-white to-gold-50 p-6 text-left transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-300 ${
+            filters.status === "pending"
+              ? "ring-2 ring-orange-400 border-orange-400"
+              : ""
+          }`}
+        >
           <div className="flex items-center mb-3">
             <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
               <Clock className="h-5 w-5 text-orange-600" />
@@ -675,7 +735,7 @@ const Expenses: React.FC = () => {
             {filteredExpenses.filter((e) => e.status === "pending").length}{" "}
             despesas
           </p>
-        </div>
+        </button>
       </div>
 
       {/* Filters */}
