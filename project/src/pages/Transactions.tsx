@@ -12,7 +12,8 @@ import CustomSelect from "../components/CustomSelect";
 import ConfirmationModal from "../components/ConfirmationModal";
 
 const Transactions: React.FC = () => {
-  const { transactions, addTransaction, removeTransaction } = useFinance();
+  const { transactions, addTransaction, removeTransaction, updateTransaction } =
+    useFinance();
   const { banks, loadBanksData, isDataLoaded: isBanksDataLoaded } = useBanks();
 
   // Predefined categories
@@ -73,6 +74,11 @@ const Transactions: React.FC = () => {
     transactionId: "",
     transactionName: "",
   });
+
+  // Edit transaction state
+  const [editTransactionId, setEditTransactionId] = useState<string | null>(
+    null
+  );
 
   // Load banks data on mount
   React.useEffect(() => {
@@ -144,19 +150,30 @@ const Transactions: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Debug: verificar a data antes de salvar
-    console.log("Data do formulário:", formData.date);
-    console.log("Data que será salva:", formData.date);
-
-    addTransaction({
-      type: formData.type,
-      payment_type: formData.payment_type,
-      destination_bank_id: formData.destination_bank_id || undefined,
-      amount: parseFloat(formData.amount),
-      description: formData.description,
-      category: formData.category,
-      date: formData.date,
-    });
+    if (editTransactionId) {
+      // Edit mode: update transaction
+      updateTransaction({
+        id: editTransactionId,
+        type: formData.type,
+        payment_type: formData.payment_type,
+        destination_bank_id: formData.destination_bank_id || undefined,
+        amount: parseFloat(formData.amount),
+        description: formData.description,
+        category: formData.category,
+        date: formData.date,
+      });
+    } else {
+      // Add mode: add new transaction
+      addTransaction({
+        type: formData.type,
+        payment_type: formData.payment_type,
+        destination_bank_id: formData.destination_bank_id || undefined,
+        amount: parseFloat(formData.amount),
+        description: formData.description,
+        category: formData.category,
+        date: formData.date,
+      });
+    }
 
     // Reset form
     setFormData({
@@ -168,10 +185,10 @@ const Transactions: React.FC = () => {
       category: "",
       date: new Date().toISOString().split("T")[0],
     });
-
     setShowCustomCategory(false);
     setCustomCategory("");
     setShowForm(false);
+    setEditTransactionId(null);
   };
 
   const handleDeleteClick = (transaction: Transaction) => {
@@ -195,6 +212,23 @@ const Transactions: React.FC = () => {
       isOpen: false,
       transactionId: "",
       transactionName: "",
+    });
+  };
+
+  // Edit transaction handler
+  const handleEditClick = (transaction: Transaction) => {
+    setEditTransactionId(transaction.id);
+    setShowForm(true);
+    setShowCustomCategory(false);
+    setCustomCategory("");
+    setFormData({
+      type: transaction.type,
+      payment_type: transaction.payment_type,
+      destination_bank_id: transaction.destination_bank_id || "",
+      amount: transaction.amount.toString(),
+      description: transaction.description,
+      category: transaction.category,
+      date: transaction.date,
     });
   };
 
@@ -378,7 +412,9 @@ const Transactions: React.FC = () => {
       {/* Add Transaction Form */}
       {showForm && (
         <div className="card p-4 min-h-[500px]">
-          <h2 className="form-title">Nova Transação</h2>
+          <h2 className="form-title">
+            {editTransactionId ? "Editar Transação" : "Nova Transação"}
+          </h2>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -516,6 +552,7 @@ const Transactions: React.FC = () => {
                   setShowForm(false);
                   setShowCustomCategory(false);
                   setCustomCategory("");
+                  setEditTransactionId(null);
                 }}
                 className="btn btn-outline w-full sm:w-auto"
               >
@@ -525,7 +562,7 @@ const Transactions: React.FC = () => {
                 type="submit"
                 className="btn btn-primary w-full sm:w-auto"
               >
-                Salvar
+                {editTransactionId ? "Salvar Alterações" : "Salvar"}
               </button>
             </div>
           </form>
@@ -616,7 +653,27 @@ const Transactions: React.FC = () => {
                     {transaction.type === "income" ? "+" : "-"} R${" "}
                     {transaction.amount.toLocaleString("pt-BR")}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-right flex gap-2 justify-end">
+                    <button
+                      onClick={() => handleEditClick(transaction)}
+                      className="text-blue-600 hover:text-blue-800 transition-colors duration-200 p-1 rounded hover:bg-blue-50"
+                      title="Editar"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a4 4 0 01-1.414.828l-4 1a1 1 0 01-1.213-1.213l1-4a4 4 0 01.828-1.414z"
+                        />
+                      </svg>
+                    </button>
                     <button
                       onClick={() => handleDeleteClick(transaction)}
                       className="text-red-600 hover:text-red-800 transition-colors duration-200 p-1 rounded hover:bg-red-50"
