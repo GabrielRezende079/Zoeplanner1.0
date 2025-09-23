@@ -477,7 +477,6 @@ const Transactions: React.FC = () => {
                   onChange={handleChange}
                   className="input-field"
                   placeholder="Ex: Salário, Supermercado, etc."
-                  required
                 />
               </div>
 
@@ -578,20 +577,20 @@ const Transactions: React.FC = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Data
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Descrição
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                  Valor
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Categoria
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Descrição
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Pagamento
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Banco Destinado
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Valor
                 </th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ações
@@ -604,11 +603,21 @@ const Transactions: React.FC = () => {
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                     {transaction.date.split("-").reverse().join("/")}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">
-                    {transaction.description}
+                  <td
+                    className={`px-4 py-3 whitespace-nowrap text-sm font-medium text-center w-40 ${
+                      transaction.type === "income"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {transaction.type === "income" ? "+" : "-"} R${" "}
+                    {transaction.amount.toLocaleString("pt-BR")}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                     {transaction.category}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">
+                    {transaction.description}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <span
@@ -642,16 +651,6 @@ const Transactions: React.FC = () => {
                       : transaction.type === "income"
                       ? "Não especificado"
                       : "-"}
-                  </td>
-                  <td
-                    className={`px-4 py-3 whitespace-nowrap text-sm font-medium text-right ${
-                      transaction.type === "income"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {transaction.type === "income" ? "+" : "-"} R${" "}
-                    {transaction.amount.toLocaleString("pt-BR")}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-right flex gap-2 justify-end">
                     <button
