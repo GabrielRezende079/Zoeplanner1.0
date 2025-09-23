@@ -272,7 +272,30 @@ const Transactions: React.FC = () => {
     new Set(transactions.map((t) => t.category))
   );
 
-  // Get current predefined categories based on transaction type
+  // Get current predefined categories and icons based on transaction type
+  const categoryIcons: Record<string, string> = {
+    // Despesas
+    Alimentação: "🍔",
+    Moradia: "🏠",
+    Transporte: "🚗",
+    Saúde: "💊",
+    Educação: "🎓",
+    Lazer: "🎮",
+    Vestuário: "👕",
+    Impostos: "💸",
+    Seguros: "🛡️",
+    Combustível: "⛽",
+    Supermercado: "🛒",
+    Presentes: "🎁",
+    Doações: "🤝",
+    // Receitas
+    Salário: "💼",
+    Venda: "💰",
+    Investimentos: "📈",
+    Bonificação: "🏅",
+    "Presente Recebido": "🎉",
+    Outros: "✨",
+  };
   const currentPredefinedCategories =
     formData.type === "income" ? incomeCategories : expenseCategories;
 
@@ -421,11 +444,36 @@ const Transactions: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tipo
                 </label>
-                <CustomSelect
-                  value={formData.type}
-                  onChange={(value) => handleSelectChange("type", value)}
-                  options={typeOptions}
-                />
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-all duration-150
+                      ${
+                        formData.type === "expense"
+                          ? "bg-red-100 border-red-400 text-red-900 shadow"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-red-50"
+                      }`}
+                    onClick={() => handleSelectChange("type", "expense")}
+                    aria-pressed={formData.type === "expense"}
+                  >
+                    <span className="text-lg">💸</span>
+                    <span>Despesa</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 flex items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-all duration-150
+                      ${
+                        formData.type === "income"
+                          ? "bg-green-100 border-green-400 text-green-900 shadow"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-green-50"
+                      }`}
+                    onClick={() => handleSelectChange("type", "income")}
+                    aria-pressed={formData.type === "income"}
+                  >
+                    <span className="text-lg">💰</span>
+                    <span>Receita</span>
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -467,7 +515,7 @@ const Transactions: React.FC = () => {
                   htmlFor="description"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Descrição
+                  Descrição (Opcional)
                 </label>
                 <input
                   id="description"
@@ -481,27 +529,92 @@ const Transactions: React.FC = () => {
               </div>
 
               <div>
-                <label
-                  htmlFor="category"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Categoria
                 </label>
-                {!showCustomCategory ? (
-                  <CategorySelector
-                    value={formData.category}
-                    onChange={handleCategoryChange}
-                    categories={currentPredefinedCategories}
-                    placeholder="Selecione uma categoria"
-                    onCustomCategory={handleCustomCategoryClick}
-                    showCustomOption={true}
-                  />
-                ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-2">
+                  {currentPredefinedCategories.map((cat) => {
+                    // Cores de fundo por categoria (padrão sutil, mas distintas)
+                    const categoryBg: Record<string, string> = {
+                      Alimentação:
+                        "bg-orange-50 hover:bg-orange-100 border-orange-200",
+                      Moradia: "bg-blue-50 hover:bg-blue-100 border-blue-200",
+                      Transporte:
+                        "bg-emerald-50 hover:bg-emerald-100 border-emerald-200",
+                      Saúde: "bg-pink-50 hover:bg-pink-100 border-pink-200",
+                      Educação:
+                        "bg-indigo-50 hover:bg-indigo-100 border-indigo-200",
+                      Lazer:
+                        "bg-yellow-50 hover:bg-yellow-100 border-yellow-200",
+                      Vestuário:
+                        "bg-purple-50 hover:bg-purple-100 border-purple-200",
+                      Impostos: "bg-red-50 hover:bg-red-100 border-red-200",
+                      Seguros: "bg-sky-50 hover:bg-sky-100 border-sky-200",
+                      Combustível:
+                        "bg-lime-50 hover:bg-lime-100 border-lime-200",
+                      Supermercado:
+                        "bg-teal-50 hover:bg-teal-100 border-teal-200",
+                      Presentes:
+                        "bg-fuchsia-50 hover:bg-fuchsia-100 border-fuchsia-200",
+                      Doações:
+                        "bg-amber-50 hover:bg-amber-100 border-amber-200",
+                      Salário:
+                        "bg-green-50 hover:bg-green-100 border-green-200",
+                      Venda: "bg-cyan-50 hover:bg-cyan-100 border-cyan-200",
+                      Investimentos:
+                        "bg-violet-50 hover:bg-violet-100 border-violet-200",
+                      Bonificação:
+                        "bg-rose-50 hover:bg-rose-100 border-rose-200",
+                      "Presente Recebido":
+                        "bg-slate-50 hover:bg-slate-100 border-slate-200",
+                      Outros: "bg-gray-50 hover:bg-gray-100 border-gray-200",
+                    };
+                    const selected = formData.category === cat;
+                    return (
+                      <button
+                        type="button"
+                        key={cat}
+                        className={`flex items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-all duration-150
+                          focus:outline-none focus:ring-2 focus:ring-gold-400
+                          active:scale-95
+                          ${
+                            categoryBg[cat] ||
+                            "bg-gray-50 hover:bg-gold-50 border-gray-200"
+                          }
+                          ${
+                            selected
+                              ? "ring-2 ring-gold-400 border-gold-400 shadow-md scale-105"
+                              : ""
+                          }
+                        `}
+                        style={{
+                          transition:
+                            "transform 0.12s cubic-bezier(.4,0,.2,1), box-shadow 0.12s cubic-bezier(.4,0,.2,1)",
+                        }}
+                        onClick={() => handleCategoryChange(cat)}
+                        aria-pressed={selected}
+                      >
+                        <span className="text-lg">
+                          {categoryIcons[cat] || "✨"}
+                        </span>
+                        <span>{cat}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  className="text-xs text-blue-600 hover:underline mt-1"
+                  onClick={handleCustomCategoryClick}
+                >
+                  Não encontrou? Adicionar categoria personalizada
+                </button>
+                {showCustomCategory && (
                   <input
                     type="text"
                     value={customCategory}
                     onChange={handleCustomCategoryChange}
-                    className="input-field"
+                    className="input-field mt-2"
                     placeholder="Digite o nome da nova categoria"
                     required
                   />
