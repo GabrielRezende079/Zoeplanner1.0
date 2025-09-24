@@ -85,6 +85,55 @@ const Banks: React.FC = () => {
     date: new Date().toISOString().split("T")[0],
     notes: "",
   });
+  // Edit balance state
+  const [editingBalanceId, setEditingBalanceId] = useState<string | null>(null);
+  const [editBalanceFormData, setEditBalanceFormData] = useState({
+    balance: "",
+    date: new Date().toISOString().split("T")[0],
+    notes: "",
+  });
+  // Edit balance handlers
+  const startEditingBalance = (balance: AccountBalance) => {
+    setEditingBalanceId(balance.id);
+    setEditBalanceFormData({
+      balance: balance.balance.toString(),
+      date: balance.date,
+      notes: balance.notes || "",
+    });
+  };
+
+  const cancelEditingBalance = () => {
+    setEditingBalanceId(null);
+    setEditBalanceFormData({
+      balance: "",
+      date: new Date().toISOString().split("T")[0],
+      notes: "",
+    });
+  };
+
+  const handleEditBalanceChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditBalanceFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditBalanceSubmit = async (
+    e: React.FormEvent,
+    balanceId: string
+  ) => {
+    e.preventDefault();
+    try {
+      await updateAccountBalance(balanceId, {
+        balance: parseFloat(editBalanceFormData.balance),
+        date: editBalanceFormData.date,
+        notes: editBalanceFormData.notes,
+      });
+      cancelEditingBalance();
+    } catch (error) {
+      console.error("Error updating balance:", error);
+    }
+  };
 
   // Investment form data
   const [investmentFormData, setInvestmentFormData] = useState({
@@ -527,7 +576,6 @@ const Banks: React.FC = () => {
                   onChange={handleBankChange}
                   className="input-field"
                   placeholder="Ex: 1234-5"
-                  required
                 />
               </div>
 
@@ -1132,33 +1180,101 @@ const Banks: React.FC = () => {
                                     key={balance.id}
                                     className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                                   >
-                                    <div className="min-w-0 flex-1">
-                                      <p className="text-sm font-medium text-gray-800">
-                                        R${" "}
-                                        {balance.balance.toLocaleString(
-                                          "pt-BR"
-                                        )}
-                                      </p>
-                                      <p className="text-xs text-gray-500">
-                                        {balance.date
-                                          .split("-")
-                                          .reverse()
-                                          .join("/")}
-                                      </p>
-                                    </div>
-                                    <button
-                                      onClick={() =>
-                                        handleDeleteClick(
-                                          "balance",
-                                          balance,
-                                          bank.id
-                                        )
-                                      }
-                                      className="text-red-600 hover:text-red-800 p-1 rounded transition-colors duration-200"
-                                      title="Excluir"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </button>
+                                    {editingBalanceId === balance.id ? (
+                                      <form
+                                        className="flex flex-col sm:flex-row flex-1 gap-2"
+                                        onSubmit={(e) =>
+                                          handleEditBalanceSubmit(e, balance.id)
+                                        }
+                                      >
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          name="balance"
+                                          value={editBalanceFormData.balance}
+                                          onChange={handleEditBalanceChange}
+                                          className="input-field w-24"
+                                          required
+                                        />
+                                        <input
+                                          type="date"
+                                          name="date"
+                                          value={editBalanceFormData.date}
+                                          onChange={handleEditBalanceChange}
+                                          className="input-field w-32"
+                                          required
+                                        />
+                                        <input
+                                          type="text"
+                                          name="notes"
+                                          value={editBalanceFormData.notes}
+                                          onChange={handleEditBalanceChange}
+                                          className="input-field flex-1"
+                                          placeholder="Observações"
+                                        />
+                                        <button
+                                          type="submit"
+                                          className="text-green-600 hover:text-green-800 p-1 rounded transition-colors duration-200"
+                                          title="Salvar"
+                                        >
+                                          <Save className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={cancelEditingBalance}
+                                          className="text-gray-600 hover:text-gray-800 p-1 rounded transition-colors duration-200"
+                                          title="Cancelar"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </button>
+                                      </form>
+                                    ) : (
+                                      <>
+                                        <div className="min-w-0 flex-1">
+                                          <p className="text-sm font-medium text-gray-800">
+                                            R${" "}
+                                            {balance.balance.toLocaleString(
+                                              "pt-BR"
+                                            )}
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            {balance.date
+                                              .split("-")
+                                              .reverse()
+                                              .join("/")}
+                                          </p>
+                                          {balance.notes && (
+                                            <p className="text-xs text-gray-400">
+                                              {balance.notes}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <button
+                                            onClick={() =>
+                                              startEditingBalance(balance)
+                                            }
+                                            className="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors duration-200"
+                                            title="Editar"
+                                          >
+                                            <Edit3 className="h-4 w-4" />
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              handleDeleteClick(
+                                                "balance",
+                                                balance,
+                                                bank.id
+                                              )
+                                            }
+                                            className="text-red-600 hover:text-red-800 p-1 rounded transition-colors duration-200"
+                                            title="Excluir"
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </button>
+                                        </div>
+                                      </>
+                                    )}
                                   </div>
                                 ))}
                             </div>
