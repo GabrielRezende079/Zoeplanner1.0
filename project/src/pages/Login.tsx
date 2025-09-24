@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../stores/authStore";
 import { supabase } from "../lib/supabase";
+import { useFinance } from "../stores/financeStore";
 import { Eye, EyeOff, Mail } from "lucide-react";
 
 const Login: React.FC = () => {
+  const { loadUserData } = useFinance();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,6 +32,7 @@ const Login: React.FC = () => {
     try {
       setIsLoading(true);
       await login({ email, password });
+      await loadUserData();
       navigate("/dashboard");
     } catch (err) {
       setError("Credenciais inválidas. Por favor, tente novamente.");

@@ -56,13 +56,15 @@ const Banks: React.FC = () => {
     loadBanksData,
     isDataLoaded,
   } = useBanks();
+  const { loadUserData } = useFinance();
 
   // Load data on mount
   useEffect(() => {
+    loadUserData();
     if (!isDataLoaded) {
       loadBanksData();
     }
-  }, [isDataLoaded, loadBanksData]);
+  }, [isDataLoaded, loadBanksData, loadUserData]);
 
   // Form states
   const [showBankForm, setShowBankForm] = useState(false);
