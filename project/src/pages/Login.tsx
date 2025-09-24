@@ -9,6 +9,7 @@ const Login: React.FC = () => {
   const { loadUserData } = useFinance();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +21,19 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Carregar dados salvos ao montar
+  React.useEffect(() => {
+    const saved = localStorage.getItem("zoeplanner_login");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.email) setEmail(parsed.email);
+        if (parsed.password) setPassword(parsed.password);
+        setRememberMe(true);
+      } catch {}
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -27,6 +41,16 @@ const Login: React.FC = () => {
     if (!email || !password) {
       setError("Por favor, preencha todos os campos");
       return;
+    }
+
+    // Salvar ou limpar dados de login
+    if (rememberMe) {
+      localStorage.setItem(
+        "zoeplanner_login",
+        JSON.stringify({ email, password })
+      );
+    } else {
+      localStorage.removeItem("zoeplanner_login");
     }
 
     try {
@@ -216,7 +240,7 @@ const Login: React.FC = () => {
               />
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
@@ -246,6 +270,39 @@ const Login: React.FC = () => {
                   )}
                 </button>
               </div>
+            </div>
+
+            <div className="mb-6 flex items-center">
+              <label
+                htmlFor="rememberMe"
+                className="flex items-center cursor-pointer group select-none"
+              >
+                <span className="relative">
+                  <input
+                    id="rememberMe"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="peer appearance-none w-5 h-5 border-2 border-olive-400 rounded bg-white checked:bg-olive-600 checked:border-olive-600 transition-colors duration-150 focus:ring-2 focus:ring-olive-400 focus:outline-none"
+                  />
+                  <svg
+                    className="pointer-events-none absolute left-0 top-0 w-5 h-5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-150"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <polyline
+                      points="5 11 9 15 15 7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span className="ml-3 text-sm text-gray-700 group-hover:text-olive-700 transition-colors">
+                  Lembrar meus dados de login
+                </span>
+              </label>
             </div>
 
             <button

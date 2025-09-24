@@ -61,13 +61,17 @@ const Onboarding: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Fix: convert tithingPractice=null to undefined for correct type
+      // Enviar campos com nomes exatos do banco e garantir que 'name' seja enviado corretamente
       const signupData = {
-        ...formData,
+        name: formData.name || "",
+        email: formData.email,
+        password: formData.password,
+        difficulty: formData.difficulty || undefined,
         tithingPractice:
           formData.tithingPractice === null
             ? undefined
             : formData.tithingPractice,
+        mainGoal: formData.mainGoal || undefined,
       };
       await signup(signupData);
       navigate("/dashboard");
